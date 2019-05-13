@@ -8,6 +8,7 @@
 import random
 
 max_row_number=22378789-1
+#max_row_number=1172-1
 
 
 def get_rand_rows(size, exclude):
@@ -18,7 +19,7 @@ def get_rand_rows(size, exclude):
     selected_row_num = random.randint(0,max_row_number)
     if not selected_row_num in exclude:
       res.append(selected_row_num)
-  return
+  return res
 
 
 def produce_train_val_test(in_file,out_train,out_test,out_val,val_rows,test_rows):
@@ -58,6 +59,6 @@ def main(in_file_en,in_file_zh):
 
 
 if __name__ == '__main__':
-  in_file_en = ''
-  in_file_zh = ''
+  in_file_en = '/root/workspace/data/my_corpus.en.atok'
+  in_file_zh = '/root/workspace/data/my_corpus.zh.atok'
   main(in_file_en,in_file_zh)
