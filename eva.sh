@@ -1,0 +1,1 @@
+python3 translate.py -gpu 7 -model mycorpus_model_v3_step_30000.pt -src /root/workspace/data/my_corpus.en.atok.test -tgt /root/workspace/data/my_corpus.zh.atok.test -replace_unk -verbose -output mycorpus.v3.test.pred.atok 

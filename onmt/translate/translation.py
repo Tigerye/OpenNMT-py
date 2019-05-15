@@ -44,7 +44,7 @@ class TranslationBuilder(object):
             if tokens[-1] == tgt_field.eos_token:
                 tokens = tokens[:-1]
                 break
-        if self.replace_unk and attn is not None and src is not None:
+        if self.replace_unk and attn is not None and src is not None and len(src_raw) != 0:
             for i in range(len(tokens)):
                 if tokens[i] == tgt_field.unk_token:
                     _, max_index = attn[i].max(0)
