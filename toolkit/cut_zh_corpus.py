@@ -26,12 +26,14 @@ if __name__ == '__main__':
   # print(b)
   # print(list(jieba.cut(a)))
   # print(list(jieba.cut(b)))
-  train_f =  '/root/workspace/data/my_corpus.zh.atok.train'
-  valid_f = '/root/workspace/data/my_corpus.zh.atok.val'
-  test_f = '/root/workspace/data/my_corpus.zh.atok.test'
-  cut_corpus(train_f)
-  cut_corpus(valid_f)
-  cut_corpus(test_f)
+  # train_f =  '/root/workspace/data/my_corpus.zh.atok.train'
+  # valid_f = '/root/workspace/data/my_corpus.zh.atok.val'
+  # test_f = '/root/workspace/data/my_corpus.zh.atok.test'
+  # cut_corpus(train_f)
+  # cut_corpus(valid_f)
+  # cut_corpus(test_f)
+  cut_corpus('/root/workspace/data/my_corpus.zh.atok')
+
 
 
 
