@@ -7,8 +7,12 @@
 
 import random
 
-max_row_number=22378789-1
+
 #max_row_number=1172-1
+data_size = 22378789
+max_row_number = data_size-1
+
+rate = 0.01
 
 
 def get_rand_rows(size, exclude):
@@ -43,8 +47,14 @@ def produce_train_val_test(in_file,out_train,out_test,out_val,val_rows,test_rows
 
 
 def main(in_file_en,in_file_zh):
-  val_rows = get_rand_rows(10000,[])
-  test_rows = get_rand_rows(10000,val_rows)
+  val_size = int(data_size*rate)
+  test_size = int(data_size*rate)
+
+  print('val_sample = [ %s ] , test_sample = [ %s ] , all = [ %s ] , rate = [ %s ]',str(val_size),str(test_size),str(data_size),str(rate))
+
+
+  val_rows = get_rand_rows(val_size,[])
+  test_rows = get_rand_rows(test_size,val_rows)
 
   train_en=in_file_en+'.train'
   train_zh=in_file_zh+'.train'
