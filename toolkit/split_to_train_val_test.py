@@ -50,7 +50,7 @@ def main(in_file_en,in_file_zh,version=None):
   val_size = int(data_size*rate)
   test_size = int(data_size*rate)
 
-  print('val_sample = [ %s ] , test_sample = [ %s ] , all = [ %s ] , rate = [ %s ]',str(val_size),str(test_size),str(data_size),str(rate))
+  print('val_sample = [ %s ] , test_sample = [ %s ] , all = [ %s ] , rate = [ %s ]' % (str(val_size),str(test_size),str(data_size),str(rate)))
 
   val_rows = get_rand_rows(val_size,[])
   test_rows = get_rand_rows(test_size,val_rows)
