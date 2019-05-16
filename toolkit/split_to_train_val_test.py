@@ -16,7 +16,7 @@ rate = 0.01
 
 
 def get_rand_rows(size, exclude):
-  res = list()
+  res = set()
   while True:
     if len(res)>=size:
       break
