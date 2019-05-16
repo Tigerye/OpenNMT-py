@@ -22,7 +22,7 @@ def get_rand_rows(size, exclude):
       break
     selected_row_num = random.randint(0,max_row_number)
     if not selected_row_num in exclude:
-      res.append(selected_row_num)
+      res.add(selected_row_num)
   return res
 
 
