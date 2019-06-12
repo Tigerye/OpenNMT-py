@@ -63,7 +63,8 @@ def _get_translator(opt):
 
 
 def _get_input_func(input_str):
-    tmp_list = list(input_str)
+    tmp_list = list()
+    tmp_list.append(input_str)
     for item in tmp_list:
       yield item
     return
