@@ -56,6 +56,7 @@ def _get_parser():
 
 def _get_translator(opt):
     # ArgumentParser.validate_translate_opts(opt)
+    print('hello 1')
     translator = build_translator(opt, report_score=True)
     return translator
 
