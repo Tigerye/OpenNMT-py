@@ -5,11 +5,12 @@
 # @fileName: my_server.py
 # @abstract:
 
+from __future__ import unicode_literals
+
 from flask import Flask
 from flask import request
 from flask import render_template
 
-from __future__ import unicode_literals
 from itertools import repeat
 
 from onmt.utils.logging import init_logger
