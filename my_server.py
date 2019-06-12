@@ -95,9 +95,6 @@ def tran_zh2en_interface():
     input = request.args.get('in')
     score,pred = _translate(input)
     print(' score = %s , pred = %s ' % (str(score), str(pred)))
-    print('xxx')
-    print(pred[0])
-    print(pred[0][0])
     res = {
       "output": pred[0][0]
     }
