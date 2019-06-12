@@ -19,6 +19,13 @@ def cut_corpus(in_file):
   print('finish , [in] = %s , [out] = %s' % (in_file,out_name))
 
 
+def cut_input(input):
+  tmp_line = ''.join(input.split())
+  tmp_token = list(jieba.cut(tmp_line))
+  new_line = ' '.join(tmp_token)
+  return new_line
+
+
 if __name__ == '__main__':
   # a='声音是从他脚边传来的 。 老人低下头 ， 看见了一朵美丽的百合花 。\n'
   # b=''.join(a.split())
