@@ -76,6 +76,7 @@ logger = None
 
 def _translate(input_text):
     cut = cut_input(input_text)
+
     cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
       src=cut_gen,
@@ -92,6 +93,10 @@ def tran_zh2en_interface():
     input = request.args.get('in')
     score,pred = _translate(input)
     print(' score = %s , pred = %s ' % (str(score), str(pred)))
+    res = {
+      "output": pred[0][0]
+    }
+    return res
 
 
 if __name__ == '__main__':
