@@ -37,6 +37,7 @@ def main(opt):
 
     for i, (src_shard, tgt_shard) in enumerate(shard_pairs):
         logger.info("Translating shard %d." % i)
+        print()
         translator.translate(
             src=src_shard,
             tgt=tgt_shard,
@@ -61,15 +62,22 @@ def _get_translator(opt):
     return translator
 
 
+def _get_input_func(input_str):
+    tmp_list = list(input_str)
+    for item in tmp_list:
+      yield item
+    return
+
 opt = None
 translator = None
 logger = None
 
 
 def _translate(input_text):
-    cuted = cut_input(input_text)
+    cut = cut_input(input_text)
+    cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
-      src=cuted,
+      src=cut_gen,
       tgt=None,
       src_dir=opt.src_dir,
       batch_size=opt.batch_size,
