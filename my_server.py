@@ -21,6 +21,8 @@ import onmt.opts as opts
 from onmt.utils.parse import ArgumentParser
 from toolkit.cut_zh_corpus import cut_input
 
+import json
+
 
 app = Flask(__name__)
 
@@ -99,7 +101,7 @@ def tran_zh2en_interface():
     res = {
       "output": pred[0][0]
     }
-    return res
+    return json.dumps(res)
 
 
 if __name__ == '__main__':
