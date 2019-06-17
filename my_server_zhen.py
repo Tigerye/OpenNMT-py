@@ -2,7 +2,7 @@
 
 # @time    : 2019/6/12 10:48 AM
 # @author  : alchemistlee
-# @fileName: my_server.py
+# @fileName: my_server_zhen.py
 # @abstract:
 
 from __future__ import unicode_literals
@@ -27,26 +27,26 @@ import json
 app = Flask(__name__)
 
 
-def main(opt):
-    ArgumentParser.validate_translate_opts(opt)
-    logger = init_logger(opt.log_file)
-
-    translator = build_translator(opt, report_score=True)
-    src_shards = split_corpus(opt.src, opt.shard_size)
-    tgt_shards = split_corpus(opt.tgt, opt.shard_size) \
-        if opt.tgt is not None else repeat(None)
-    shard_pairs = zip(src_shards, tgt_shards)
-
-    for i, (src_shard, tgt_shard) in enumerate(shard_pairs):
-        logger.info("Translating shard %d." % i)
-        print()
-        translator.translate(
-            src=src_shard,
-            tgt=tgt_shard,
-            src_dir=opt.src_dir,
-            batch_size=opt.batch_size,
-            attn_debug=opt.attn_debug
-            )
+# def main(opt):
+#     ArgumentParser.validate_translate_opts(opt)
+#     logger = init_logger(opt.log_file)
+#
+#     translator = build_translator(opt, report_score=True)
+#     src_shards = split_corpus(opt.src, opt.shard_size)
+#     tgt_shards = split_corpus(opt.tgt, opt.shard_size) \
+#         if opt.tgt is not None else repeat(None)
+#     shard_pairs = zip(src_shards, tgt_shards)
+#
+#     for i, (src_shard, tgt_shard) in enumerate(shard_pairs):
+#         logger.info("Translating shard %d." % i)
+#         print()
+#         translator.translate(
+#             src=src_shard,
+#             tgt=tgt_shard,
+#             src_dir=opt.src_dir,
+#             batch_size=opt.batch_size,
+#             attn_debug=opt.attn_debug
+#             )
 
 
 def _get_parser():
@@ -90,9 +90,13 @@ def _translate(input_text):
     return score,prediction
 
 
-@app.route('/translate/zh2en/',methods=['GET'])
+@app.route('/translate/zh2en/',methods=['GET','POST'])
 def tran_zh2en_interface():
-    input = request.args.get('in')
+
+    if request.method == 'POST':
+        input = request.form['in']
+    else:
+        input = request.args.get('in')
     score,pred = _translate(input)
     print(' score = %s , pred = %s ' % (str(score), str(pred)))
     res = {
@@ -111,4 +115,4 @@ if __name__ == '__main__':
     translator = _get_translator(opt)
 
     app.debug = True
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port=5000)
