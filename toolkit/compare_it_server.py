@@ -63,7 +63,7 @@ def get_youdao_res(input,direction = 'zhen'):
 
 
 def get_opennmt_res(input,direction='zhen'):
-  enzh_url = 'http://114.80.118.188:5000/translate/en2zh/'
+  enzh_url = 'http://114.80.118.188:5001/translate/en2zh/'
   zhen_url = 'http://114.80.118.188:5000/translate/zh2en/'
 
   if direction == 'enzh':
@@ -81,9 +81,9 @@ def get_opennmt_res(input,direction='zhen'):
   return r.text
 
 
-
-
 if __name__ == '__main__':
-  a = 'hello world'
-  b = get_youdao_res(a,'enzh')
+  # a = 'hello world'
+  # b = get_youdao_res(a,'enzh')
+  a= '神评论亮了！'
+  b= get_opennmt_res(a,'zhen')
   print(b)

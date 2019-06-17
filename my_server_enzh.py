@@ -93,7 +93,9 @@ def _translate(input_text):
 @app.route('/translate/en2zh/',methods=['GET','POST'])
 def tran_en2zh_interface():
     if request.method == 'POST':
-        input = request.form['in']
+        data = request.get_data()
+        json_data = json.loads(data.decode("utf-8"))
+        input = json_data['in']
     else:
         input = request.args.get('in')
     score,pred = _translate(input)

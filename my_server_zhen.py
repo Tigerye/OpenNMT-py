@@ -94,7 +94,9 @@ def _translate(input_text):
 def tran_zh2en_interface():
 
     if request.method == 'POST':
-        input = request.form['in']
+        data = request.get_data()
+        json_data = json.loads(data.decode("utf-8"))
+        input = json_data['in']
     else:
         input = request.args.get('in')
     score,pred = _translate(input)
