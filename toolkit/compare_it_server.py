@@ -5,10 +5,18 @@
 # @fileName: compare_it_server.py
 # @abstract:
 
+from __future__ import unicode_literals
+
+from flask import Flask
+from flask import request
+
 import requests
 import hashlib
 import time
 import json
+
+app = Flask(__name__)
+
 
 def _encrypt(signStr):
   hash_algorithm = hashlib.sha256()
@@ -76,14 +84,39 @@ def get_opennmt_res(input,direction='zhen'):
 
   headers = {'content-type': 'application/json'}
 
-  r = requests.post(url,headers=headers , data=params)
+  r = requests.post(url,headers=headers , data=json.dumps(params))
 
-  return r.text
+  res = json.loads(r.text)
+  return res['output']
 
+
+@app.route('/cmp/translate/',methods=['GET','POST'])
+def trans_it():
+  if request.method == 'POST':
+    data = request.get_data()
+    json_data = json.loads(data.decode("utf-8"))
+    input = json_data['in']
+    dir='zhen'
+  else:
+    input = request.args.get('in')
+    dir='zhen'
+
+  youdao_res = get_youdao_res(input,dir)
+  opennmt_res = get_opennmt_res(input,dir)
+
+  res = {
+    'origin':input,
+    'youdao': youdao_res,
+    'open-nmt':opennmt_res
+  }
+  return json.dumps(res)
 
 if __name__ == '__main__':
   # a = 'hello world'
   # b = get_youdao_res(a,'enzh')
-  a= '神评论亮了！'
-  b= get_opennmt_res(a,'zhen')
-  print(b)
+  # a= '神评论亮了！'
+  # b= get_opennmt_res(a,'zhen')
+  # print(b)
+
+  app.debug = True
+  app.run(host='0.0.0.0', port=5005)
