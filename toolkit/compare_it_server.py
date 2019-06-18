@@ -90,30 +90,65 @@ def get_opennmt_res(input,direction='zhen'):
   return res['output']
 
 
+def get_google_res(input, direction = 'zhen'):
+  url = 'https://translation.googleapis.com/language/translate/v2'
+  key = 'AIzaSyCQKN13Dj4WPTxMphc00DPB0wYyJVEnzOI'
+
+  if direction == 'zhen':
+    from_str = 'zh-cn'
+    to_str = 'en'
+  else :
+    from_str = 'en'
+    to_str = 'zh-cn'
+
+  params = dict()
+  params["target"] = to_str
+  params["source"] = from_str
+  params["key"] = key
+  params["q"] = input
+
+  headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+  r = requests.post(url,headers=headers , data=params)
+  res = json.loads(r.text)
+  res = res['data']
+  res = res['translations']
+  tmp = res[0]
+  res = tmp['translatedText']
+  return res
+
+
 @app.route('/cmp/translate/',methods=['GET','POST'])
 def trans_it():
+  dir='zhen'
   if request.method == 'POST':
     data = request.get_data()
     json_data = json.loads(data.decode("utf-8"))
     input = json_data['in']
-    dir='zhen'
+    if 'dir' in json_data:
+      dir = json_data['dir']
   else:
     input = request.args.get('in')
-    dir='zhen'
+    if request.args.get('dir') != None:
+      dir = request.args.get('dir')
+
 
   youdao_res = get_youdao_res(input,dir)
   opennmt_res = get_opennmt_res(input,dir)
+  google_res = get_google_res(input,dir)
 
   res = {
     'origin':input,
     'youdao': youdao_res,
-    'open-nmt':opennmt_res
+    'open-nmt':opennmt_res,
+    'goog': google_res
   }
-  return json.dumps(res)
+  return json.dumps(res,ensure_ascii=False)
 
 if __name__ == '__main__':
-  # a = 'hello world'
+  a = 'hello world'
   # b = get_youdao_res(a,'enzh')
+  # b = get_google_res(a,'enzh')
   # a= '神评论亮了！'
   # b= get_opennmt_res(a,'zhen')
   # print(b)
