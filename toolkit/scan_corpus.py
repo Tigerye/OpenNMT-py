@@ -6,10 +6,11 @@
 # @abstract:
 
 import os
-from toolkit.api_utils import get_youdao_res
+from api_utils import get_youdao_res, logging
 import Levenshtein
 import random
 import numpy as np
+import time
 
 
 def load_corpus_file(catalog_file):
@@ -75,38 +76,41 @@ def summary_score(scores,doc_cnt):
   return avg_score, mid_score, good_score_cnt/doc_cnt
 
 
-def main(catalog_file):
+def main(catalog_file, log_file):
   all_corpus = load_corpus_file(catalog_file)
 
-  for dir in all_corpus.keys():
-    tmp_info = all_corpus[dir]
-    en_file = tmp_info['en']
-    zh_file = tmp_info['zh']
+  with open(log_file,'w') as log_fh:
+    for dir in all_corpus.keys():
+      tmp_info = all_corpus[dir]
+      en_file = tmp_info['en']
+      zh_file = tmp_info['zh']
 
-    print('dir = {}'.format(dir))
-    print('en = {} , zh = {}'.format(en_file,zh_file))
+      logging(log_fh, 'dir = {}'.format(dir))
+      logging(log_fh, 'en = {} , zh = {}'.format(en_file,zh_file))
 
-    tmp_en = dir + '/'+ en_file
-    tmp_zh = dir + '/'+ zh_file
+      tmp_en = dir + '/'+ en_file
+      tmp_zh = dir + '/'+ zh_file
 
-    zh_sample, en_sample, doc_size = random_sample(tmp_en, tmp_zh, 0.01)
+      zh_sample, en_sample, doc_size = random_sample(tmp_en, tmp_zh, 0.01)
 
-    assert len(zh_sample) == len(en_sample)
+      assert len(zh_sample) == len(en_sample)
 
-    scores = []
+      scores = []
 
-    for i in range(len(zh_sample)):
-      zh_line = zh_sample[i]
-      en_line = en_sample[i]
-      baseline_en = get_youdao_res(zh_line)
+      for i in range(len(zh_sample)):
+        zh_line = zh_sample[i]
+        en_line = en_sample[i]
+        baseline_en = get_youdao_res(zh_line)
+        time.sleep(0.1)
+        baseline_en = baseline_en[0]
 
-      sim_score = get_distance(baseline_en, en_line)
+        sim_score = get_distance(baseline_en, en_line)
 
-      scores.append(sim_score)
+        scores.append(sim_score)
 
-    avg, mid, good_per = summary_score(scores, doc_size)
-    print('avg = {} , mid = {} , good_per = {} '.format(avg, mid, good_per))
+      avg, mid, good_per = summary_score(scores, doc_size)
+      logging(log_fh, 'avg = {} , mid = {} , good_per = {} '.format(avg, mid, good_per))
 
 
 if __name__ == '__main__':
-  main(catalog_file='/root/workspace/translate_data/corpus_file_list')
+  main(catalog_file='/root/workspace/translate_data/corpus_file_list',log_file='/root/workspace/translate_data/corpus.log')

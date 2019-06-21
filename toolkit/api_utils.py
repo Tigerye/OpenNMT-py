@@ -11,6 +11,11 @@ import hashlib
 import time
 
 
+def logging(fh, content):
+  print(content)
+  content += '\n'
+  fh.write(content)
+
 def _encrypt(signStr):
   hash_algorithm = hashlib.sha256()
   hash_algorithm.update(signStr.encode('utf-8'))
@@ -35,7 +40,7 @@ def get_youdao_res(input,direction = 'zhen'):
   tmp = app_key + _truncate(input) + salt + curtime + passwd
   sign = _encrypt(tmp)
 
-  print(sign)
+  # print(sign)
 
   if direction == 'zhen':
     from_str = 'zh-CHS'
@@ -60,6 +65,7 @@ def get_youdao_res(input,direction = 'zhen'):
   headers = {'Content-Type': 'application/x-www-form-urlencoded'}
   r = requests.post(url,headers=headers , data=params)
   res =json.loads(r.text)
+  print(res)
   return res['translation']
 
 
