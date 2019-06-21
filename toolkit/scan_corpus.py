@@ -91,7 +91,7 @@ def main(catalog_file, log_file):
       tmp_en = dir + '/'+ en_file
       tmp_zh = dir + '/'+ zh_file
 
-      zh_sample, en_sample, doc_size = random_sample(tmp_en, tmp_zh, 0.0001)
+      zh_sample, en_sample, doc_size = random_sample(tmp_en, tmp_zh, 0.001)
 
       assert len(zh_sample) == len(en_sample)
 
