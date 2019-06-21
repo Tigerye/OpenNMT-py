@@ -67,6 +67,10 @@ def random_sample(en_file, zh_file, rate):
 
 
 def summary_score(scores,doc_cnt):
+  if len(scores) == 0:
+    print('score is empty ! ')
+    return
+
   avg_score = np.mean(scores)
   mid_score = np.median(scores)
   good_score_cnt = 0
