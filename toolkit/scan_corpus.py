@@ -105,6 +105,8 @@ def main(catalog_file, log_file):
         zh_line = zh_sample[i]
         en_line = en_sample[i]
         baseline_en = get_youdao_res(zh_line)
+        if baseline_en is None:
+          continue
         time.sleep(1)
         baseline_en = baseline_en[0]
 

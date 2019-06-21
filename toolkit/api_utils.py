@@ -65,9 +65,10 @@ def get_youdao_res(input,direction = 'zhen'):
   r = requests.post(url,headers=headers , data=params)
   res =json.loads(r.text)
   # print(res)
-  if not 'translation' in res :
+  if not 'translation' in res:
     print(params)
     print(res)
+    return None
   return res['translation']
 
 
