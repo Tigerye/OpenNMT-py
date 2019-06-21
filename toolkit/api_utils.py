@@ -60,12 +60,14 @@ def get_youdao_res(input,direction = 'zhen'):
 
   params['curtime'] = curtime
 
-  print(params)
-
+  # print(params)
   headers = {'Content-Type': 'application/x-www-form-urlencoded'}
   r = requests.post(url,headers=headers , data=params)
   res =json.loads(r.text)
-  print(res)
+  # print(res)
+  if not 'translation' in res :
+    print(params)
+    print(res)
   return res['translation']
 
 
