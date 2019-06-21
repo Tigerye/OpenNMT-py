@@ -91,7 +91,7 @@ def main(catalog_file, log_file):
       tmp_en = dir + '/'+ en_file
       tmp_zh = dir + '/'+ zh_file
 
-      zh_sample, en_sample, doc_size = random_sample(tmp_en, tmp_zh, 0.01)
+      zh_sample, en_sample, doc_size = random_sample(tmp_en, tmp_zh, 0.0001)
 
       assert len(zh_sample) == len(en_sample)
 
@@ -101,11 +101,12 @@ def main(catalog_file, log_file):
         zh_line = zh_sample[i]
         en_line = en_sample[i]
         baseline_en = get_youdao_res(zh_line)
-        time.sleep(0.1)
+        time.sleep(1)
         baseline_en = baseline_en[0]
 
         sim_score = get_distance(baseline_en, en_line)
-
+        print('base = {} , ori = {}'.format(baseline_en, en_line))
+        print('score = {}'.format(str(sim_score)))
         scores.append(sim_score)
 
       avg, mid, good_per = summary_score(scores, doc_size)
