@@ -77,7 +77,7 @@ def summary_score(scores,doc_cnt):
   for s in scores:
     if s >= 0.6:
       good_score_cnt +=1
-  return avg_score, mid_score, good_score_cnt/doc_cnt
+  return avg_score, mid_score, good_score_cnt/len(scores)
 
 
 def main(catalog_file, log_file):
