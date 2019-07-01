@@ -77,15 +77,22 @@ translator = None
 logger = None
 proc = None
 
+def merge_dict(a,b):
+    for k in b.keys():
+        if not k in a.keys():
+            a[k] = b[k]
+    return a
 
 def _translate(input_text):
     cut = cut_input(input_text)
     cuted, rep2val = proc.pre_proc_zh_py(cut)
     tmp_cut_str = ' '.join(cuted)
-    tmp_cut_str = proc.pre_proc_zh_nu(tmp_cut_str)
+    tmp_cut_str, rep2val_nu = proc.pre_proc_zh_nu(tmp_cut_str)
+
+    rep2val = merge_dict(rep2val,rep2val_nu)
 
     cut = tmp_cut_str.split()
-
+    print('cut = {}'.format(cut))
     cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
       src=cut_gen,
@@ -96,8 +103,11 @@ def _translate(input_text):
     )
 
     output_str = prediction[0][0]
+    print('ori = {}'.format(output_str))
     output_str = proc.post_proc(output_str,rep2val)
+    print('rep ent = {}'.format(output_str))
     output_str = proc.proc_bpe(output_str)
+    print('rep bpe = {}'.format(output_str))
 
     return score,output_str
 
