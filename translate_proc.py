@@ -100,7 +100,7 @@ class PrePostProc(object):
 
     def pre_proc_zh_py(self, input_token):
         # input_token = list(jieba.cut(input_str))
-        print('input = {}'.format(input_token))
+        # print('input = {}'.format(input_token))
         matched = list()
         rep2val = dict()
 

@@ -90,7 +90,7 @@ def _translate(input_text):
     tmp_cut_str, rep2val_nu = proc.pre_proc_zh_nu(tmp_cut_str)
 
     rep2val = merge_dict(rep2val,rep2val_nu)
-
+    print(' rep2val = {}'.format(rep2val))
     cut = tmp_cut_str.split()
     print('cut = {}'.format(cut))
     cut_gen = _get_input_func(cut)
