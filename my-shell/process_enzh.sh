@@ -1,0 +1,1 @@
+nohup python preprocess.py -train_src /root/workspace/data/my_corpus.en.atok-v4-.train -train_tgt /root/workspace/data/my_corpus.zh.atok-v4-.train -valid_src /root/workspace/data/my_corpus.en.atok-v4-.val -valid_tgt /root/workspace/data/my_corpus.zh.atok-v4-.val -save_data /root/workspace/data/my_corpus_v4.atok.low -lower -filter_valid &

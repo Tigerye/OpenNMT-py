@@ -1,0 +1,26 @@
+python filter_example.py
+
+shard_data.sh
+
+pred_zhen_shard.sh
+
+cat `ls my_corpus.en.atok-v4-.train.under100.mycorpus_model_v4_zhen_step_150000.pt.* | sort` > my_corpus.en.atok-v4-.train.under100.mycorpus_model_v4_zhen_step_150000.pt.all
+
+# check if aligned
+wc -l /root/workspace/translate_data/my_corpus.en.atok-v4-.train.under100 
+wc -l /root/workspace/translate_data/distill/my_corpus.en.atok-v4-.train.under100.mycorpus_model_v4_zhen_step_150000.pt.all
+
+sed -n 10000,10002p /root/workspace/translate_data/my_corpus.en.atok-v4-.train.under100 
+sed -n 10000,10002p /root/workspace/translate_data/distill/my_corpus.en.atok-v4-.train.under100.mycorpus_model_v4_zhen_step_150000.pt.all
+
+sed -n 100000,100002p /root/workspace/translate_data/my_corpus.en.atok-v4-.train.under100 
+sed -n 100000,100002p /root/workspace/translate_data/distill/my_corpus.en.atok-v4-.train.under100.mycorpus_model_v4_zhen_step_150000.pt.all
+
+# preprocess
+process_zhen.sh
+
+# run
+run_zhen.sh
+
+# final test
+pred_zhen_final.sh

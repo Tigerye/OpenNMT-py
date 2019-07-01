@@ -111,6 +111,9 @@ ENV/
 # Tensorboard
 runs/
 
-nohup.out
+*.out
 *.atok
 *.test
+*.pt
+*.txt
+*.txt-cut
