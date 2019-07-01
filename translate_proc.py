@@ -159,12 +159,22 @@ class PrePostProc(object):
         self._key2val =d
 
 if __name__ == '__main__':
-    input = '中国大家和的河南人民'
+    input = '金逸影视营收额为100亿元，截止2018年1月31号'
     p = PrePostProc()
-    a= {'河南':'henan'}
+    a= {
+        '北京':'beijing',
+        '金逸':'jinyi'
+        }
     p.set_data(a)
     tk = list(jieba.cut(input))
     out_tk, rep=p.pre_proc_zh_py(tk)
+    out_str = ' '.join(out_tk)
+    print(out_str)
+    tmp_cut_str, rep2val_nu = p.pre_proc_zh_nu(out_str)
+
+    print(tmp_cut_str)
+    print(rep2val_nu)
+
     print(out_tk)
     print(rep)
 
