@@ -86,7 +86,7 @@ class PrePostProc(object):
                 orow_zh = orow_zh[:zh_index[0]] + " " * len(row_zh[i]) + orow_zh[zh_index[1]:]
                 if self.isChinese(row_zh[i]):
                     row_zh[i] = cn2an.cn2an(row_zh[i])
-                ret_map[unkk] = row_zh[i]
+                ret_map[unkk.strip()] = row_zh[i]
             except:
                 continue
         orow_zh = "".join(zh_list)
