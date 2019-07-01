@@ -22,7 +22,7 @@ from onmt.utils.parse import ArgumentParser
 from toolkit.cut_zh_corpus import cut_input
 
 import json
-
+from translate_proc import PrePostProc
 
 app = Flask(__name__)
 
@@ -47,6 +47,7 @@ app = Flask(__name__)
 #             batch_size=opt.batch_size,
 #             attn_debug=opt.attn_debug
 #             )
+
 
 
 def _get_parser():
@@ -74,10 +75,16 @@ def _get_input_func(input_str):
 opt = None
 translator = None
 logger = None
+proc = None
 
 
 def _translate(input_text):
     cut = cut_input(input_text)
+    cuted, rep2val = proc.pre_proc_zh_py(cut)
+    tmp_cut_str = ' '.join(cuted)
+    tmp_cut_str = proc.pre_proc_zh_nu(tmp_cut_str)
+
+    cut = tmp_cut_str.split()
 
     cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
@@ -87,7 +94,13 @@ def _translate(input_text):
       batch_size=opt.batch_size,
       attn_debug=opt.attn_debug
     )
-    return score,prediction
+
+    output_str = prediction[0][0]
+    output_str = proc.post_proc(output_str,rep2val)
+    output_str = proc.proc_bpe(output_str)
+
+    return score,output_str
+
 
 
 @app.route('/translate/zh2en/',methods=['GET','POST'])
@@ -102,7 +115,7 @@ def tran_zh2en_interface():
     score,pred = _translate(input)
     print(' score = %s , pred = %s ' % (str(score), str(pred)))
     res = {
-      "output": pred[0][0]
+      "output": pred
     }
     return json.dumps(res)
 
@@ -115,6 +128,9 @@ if __name__ == '__main__':
     logger = init_logger(opt.log_file)
 
     translator = _get_translator(opt)
+
+    proc = PrePostProc()
+    proc.load_data('py_ent_dict.txt')
 
     app.debug = True
     app.run(host='0.0.0.0',port=5000)
