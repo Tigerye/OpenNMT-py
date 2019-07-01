@@ -19,11 +19,14 @@ def cut_corpus(in_file):
   print('finish , [in] = %s , [out] = %s' % (in_file,out_name))
 
 
-def cut_input(input):
+def cut_input(input,type='str'):
   tmp_line = ''.join(input.split())
   tmp_token = list(jieba.cut(tmp_line))
-  new_line = ' '.join(tmp_token)
-  return new_line
+  if type == 'str':
+    new_line = ' '.join(tmp_token)
+    return new_line
+  else:
+    return tmp_token
 
 
 if __name__ == '__main__':

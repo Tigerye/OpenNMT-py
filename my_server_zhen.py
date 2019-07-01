@@ -84,7 +84,7 @@ def merge_dict(a,b):
     return a
 
 def _translate(input_text):
-    cut = cut_input(input_text)
+    cut = cut_input(input_text,'lst')
     cuted, rep2val = proc.pre_proc_zh_py(cut)
     tmp_cut_str = ' '.join(cuted)
     tmp_cut_str, rep2val_nu = proc.pre_proc_zh_nu(tmp_cut_str)
