@@ -4,12 +4,17 @@
 # @author  : alchemistlee
 # @fileName: translate_proc.py
 # @abstract:
-
+import string
 from sliding_utils import *
 import random
 import re
 import jieba
 import cn2an
+
+
+sp_pattern = r"<@sp\d{1,3}@>"
+pattern = r'\d+|[零一二三四五六七八九十百千万亿兆]+'
+
 
 class PrePostProc(object):
 
@@ -36,61 +41,70 @@ class PrePostProc(object):
             input_lst[i] = ''
         return input_lst
 
-    def isChinese(self,word):
+
+    def randomString(stringLength=10):
+        """Generate a random string of fixed length """
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(stringLength))
+
+
+    def isChinese(word):
         for ch in word:
             if '\u4e00' <= ch <= '\u9fff':
-                return True
-        return False
+                try:
+                    return cn2an.cn2an(word)
+                except:
+                    return  word
+        return word
 
-    def replace_num(self,orow_zh):
+
+    def replace_sp(input_string):
+        sp_list = re.findall(sp_pattern, input_string)
+        sp_list = set(sp_list)
+        ret_map = {}
+        unique_keys = set()
+        for sp in sp_list:
+            key = randomString(12)
+            while key in unique_keys:
+                key = randomString(12)
+            unique_keys.add(key)
+            ret_map[key] = sp
+            input_string = re.sub(sp, key, input_string)
+        return input_string, ret_map
+
+
+    def recover_sp(input_string, ret_map):
+        for rad in ret_map.keys():
+            input_string = re.sub(rad, ret_map[rad], input_string)
+        return input_string
+
+
+    def replace_num(input_string):
         unk1 = " <@nu"
         unk2 = "@> "
+        unk_map = {}
+        input_string, retmap = replace_sp(input_string)
+        match_list = re.findall(pattern, input_string)
+        input_list = list(input_string)
         seen = set()
-        search_num_zh = {}
-        pattern = r'\d+|<@sp\d{1,3}@>|[零一二三四五六七八九十百千万亿兆]+|<@nu.*@>]'
-        arow_zh = re.findall(pattern, orow_zh)
-        unks_zh = [a for a in arow_zh if a[:4] == "<@sp"]
-        row_zh = [a for a in arow_zh if a[:4] != "<@sp" and a[:4] != "<@nu"]
-        ret_map = {}
-        if len(row_zh) >= 180:
-            return None
-        zh_list = list(orow_zh)
-        for i in range(len(row_zh)):
-            if self.isChinese(row_zh[i]):
-                try:
-                    num_zh = cn2an.cn2an(row_zh[i])
-                    num_zh = str(num_zh)
-                except:
-                    continue
-            if row_zh[i] not in search_num_zh.keys():
-                search_num_zh[row_zh[i]] = 0
-            num = random.sample(range(30), 1)[0]
-            if len(seen) == 29:
+        for target in match_list:
+            num_target = isChinese(target)
+            index = re.search(target, input_string).span()
+            num = random.sample(range(200), 1)[0]
+            if len(seen) == 199:
                 print("again")
                 break
             while num in seen:
                 num = random.sample(range(30), 1)[0]
             seen.add(num)
-            unkk = unk1 + str(num) + unk2
-            try:
-                inunk = False
-                zh_index = re.search(row_zh[i], orow_zh).span()
-                for unk in unks_zh:
-                    unk_index = re.search(unk, orow_zh).span()
-                    if zh_index[i] >= unk_index[0] and zh_index[i] <= unk_index[1]:
-                        inunk = True
-                        break
-                    if inunk:
-                        continue
-                zh_list = zh_list[:zh_index[0]] + [unkk] + [''] * (len(row_zh[i]) - 1) + zh_list[zh_index[1]:]
-                orow_zh = orow_zh[:zh_index[0]] + " " * len(row_zh[i]) + orow_zh[zh_index[1]:]
-                if self.isChinese(row_zh[i]):
-                    row_zh[i] = cn2an.cn2an(row_zh[i])
-                ret_map[unkk.strip()] = row_zh[i]
-            except:
-                continue
-        orow_zh = "".join(zh_list)
-        return orow_zh, ret_map
+            unk = unk1 + str(num) + unk2
+            input_list = input_list[:index[0]] + [unk] + [''] * (len(target) - 1) + input_list[index[1]:]
+            input_string = input_string[:index[0]] + " " * len(target) + input_string[index[1]:]
+            unk_map[unk] = num_target
+        input_string = "".join(input_list)
+        input_string = recover_sp(input_string, retmap)
+        return input_string, unk_map
+
 
     def pre_proc_zh_nu(self,  input_str):
         # num_res = re.findall(r'\d+|<@sp\d{1,3}@>|[零一二三四五六七八九十百千万亿兆]+|<@nu.*@>]',)
@@ -177,4 +191,3 @@ if __name__ == '__main__':
 
     print(out_tk)
     print(rep)
-
