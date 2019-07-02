@@ -152,7 +152,7 @@ class PrePostProc(object):
     def post_proc(self, input_str, rep2val_map):
         for k in rep2val_map.keys() :
             tmp_val = rep2val_map[k]
-            input_str = input_str.replace(k,tmp_val)
+            input_str = input_str.replace(k,str(tmp_val))
         return input_str
 
     def set_data(self,d):
