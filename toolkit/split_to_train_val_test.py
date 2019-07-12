@@ -9,7 +9,7 @@ import random
 
 
 #max_row_number=1172-1
-data_size = 23001083
+data_size = 23001485
 max_row_number = data_size-1
 
 rate = 0.01
@@ -75,6 +75,6 @@ def main(in_file_en,in_file_zh,version=None):
 
 
 if __name__ == '__main__':
-  in_file_en = '/root/workspace/translate_data/my_corpus_v6.en.processed4-bpe'
-  in_file_zh = '/root/workspace/translate_data/my_corpus_v6.zh-cut.processed4'
-  main(in_file_en,in_file_zh,version='v6')
+  in_file_en = '/root/workspace/translate_data/my_corpus_v6.en.tok.processed6-bpe'
+  in_file_zh = '/root/workspace/translate_data/my_corpus_v6.zh-cut.processed6-bpe'
+  main(in_file_en,in_file_zh,version='v6-2')
