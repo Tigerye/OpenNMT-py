@@ -77,8 +77,8 @@ logger = None
 
 
 def _translate(input_text):
-    cut = cut_input(input_text)
-
+    # cut = cut_input(input_text)
+    cut = input_text
     cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
       src=cut_gen,
