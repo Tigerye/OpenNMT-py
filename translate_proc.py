@@ -64,12 +64,12 @@ class PrePostProc(object):
                     continue
             if row_zh[i] not in search_num_zh.keys():
                 search_num_zh[row_zh[i]] = 0
-            num = random.sample(range(200), 1)[0]
-            if len(seen) == 199:
+            num = random.sample(range(30), 1)[0]
+            if len(seen) == 29:
                 print("again")
                 break
             while num in seen:
-                num = random.sample(range(200), 1)[0]
+                num = random.sample(range(30), 1)[0]
             seen.add(num)
             unkk = unk1 + str(num) + unk2
             try:
@@ -120,7 +120,7 @@ class PrePostProc(object):
             replaced_str = None
             while rand_cnt < 10:
 
-                tmp_seed = random.randint(0,199)
+                tmp_seed = random.randint(0,29)
                 tmp_rep = self._py_tpl % tmp_seed
 
                 if tmp_rep in rep2val.keys():
