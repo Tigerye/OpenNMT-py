@@ -82,6 +82,8 @@ bpe = None
 def _translate(input_text):
     # cut = cut_input(input_text)
     cut = input_text
+    cut = bpe.process_line(cut)
+    print('bpe = {}'.format(cut))
     cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
       src=cut_gen,
@@ -118,11 +120,11 @@ if __name__ == '__main__':
 
     translator = _get_translator(opt)
 
-    # c = codecs.open('/root/workspace/translate_data/my_corpus_v6.zh-cut.processed6-bpe-code', encoding='utf-8')
-    # m = -1
-    # sp = '@@'
-    # voc = None
-    # bpe = BPE(c, m, sp, voc, None)
+    c = codecs.open('/root/workspace/translate_data/my_corpus_v6.en.tok.processed6-bpe-code', encoding='utf-8')
+    m = -1
+    sp = '@@'
+    voc = None
+    bpe = BPE(c, m, sp, voc, None)
 
     app.debug = True
     app.run(host='0.0.0.0',port=5001)
