@@ -24,6 +24,10 @@ from toolkit.cut_zh_corpus import cut_input
 import json
 from translate_proc import PrePostProc
 
+import codecs
+from subword_nmt.apply_bpe import BPE
+
+
 app = Flask(__name__)
 
 
@@ -76,6 +80,8 @@ opt = None
 translator = None
 logger = None
 proc = None
+bpe = None
+
 
 def merge_dict(a,b):
     for k in b.keys():
@@ -85,12 +91,16 @@ def merge_dict(a,b):
 
 def _translate(input_text):
     cut = cut_input(input_text,'lst')
+
     cuted, rep2val = proc.pre_proc_zh_py(cut)
     tmp_cut_str = ' '.join(cuted)
     tmp_cut_str, rep2val_nu = proc.pre_proc_zh_nu(tmp_cut_str)
 
     rep2val = merge_dict(rep2val,rep2val_nu)
     print(' rep2val = {}'.format(rep2val))
+
+    tmp_cut_str = bpe.process_line(tmp_cut_str)
+    print('bpe-res = {}'.format(tmp_cut_str))
     cut = tmp_cut_str.split()
     print('cut = {}'.format(cut))
     cut_gen = _get_input_func(cut)
@@ -141,6 +151,12 @@ if __name__ == '__main__':
 
     proc = PrePostProc()
     proc.load_data('py_ent_dict.txt')
+
+    c = codecs.open('/root/workspace/translate_data/my_corpus_v6.zh-cut.processed6-bpe-code', encoding='utf-8')
+    m = -1
+    sp = '@@'
+    voc = None
+    bpe = BPE(c, m, sp, voc, None)
 
     app.debug = True
     app.run(host='0.0.0.0',port=5000)

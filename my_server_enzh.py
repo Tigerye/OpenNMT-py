@@ -22,6 +22,8 @@ from onmt.utils.parse import ArgumentParser
 from toolkit.cut_zh_corpus import cut_input
 
 import json
+import codecs
+from  subword_nmt.apply_bpe import BPE
 
 
 app = Flask(__name__)
@@ -74,6 +76,7 @@ def _get_input_func(input_str):
 opt = None
 translator = None
 logger = None
+bpe = None
 
 
 def _translate(input_text):
@@ -114,6 +117,12 @@ if __name__ == '__main__':
     logger = init_logger(opt.log_file)
 
     translator = _get_translator(opt)
+
+    # c = codecs.open('/root/workspace/translate_data/my_corpus_v6.zh-cut.processed6-bpe-code', encoding='utf-8')
+    # m = -1
+    # sp = '@@'
+    # voc = None
+    # bpe = BPE(c, m, sp, voc, None)
 
     app.debug = True
     app.run(host='0.0.0.0',port=5001)
