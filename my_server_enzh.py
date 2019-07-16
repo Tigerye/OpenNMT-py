@@ -91,6 +91,14 @@ bpe = None
 proc = None
 
 
+def _unzip_list(origin_pred):
+    res = []
+    for i in range(len(origin_pred)):
+        item = origin_pred[i]
+        res.append(item[0])
+    return res
+
+
 def _translate(input_text):
     # cut = cut_input(input_text)
     cut = str_utils.split_as_sentence(input_text, type='en')
@@ -108,7 +116,7 @@ def _translate(input_text):
       attn_debug=opt.attn_debug
     )
 
-    output_lst = prediction[0]
+    output_lst = _unzip_list(prediction)
     output_str = '/'.join(output_lst)
     print('ori = {}'.format(output_str))
     # replace entity
@@ -118,7 +126,7 @@ def _translate(input_text):
     output_str = proc.proc_bpe(output_str)
     print('rep bpe = {}'.format(output_str))
 
-    return score,prediction
+    return score,output_str
 
 
 @app.route('/translate/en2zh/',methods=['GET','POST'])
