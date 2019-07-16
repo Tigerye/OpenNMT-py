@@ -76,6 +76,14 @@ def _bpe_proc_lines(input_lst):
     return res
 
 
+def _unzip_list(origin_pred):
+    res = []
+    for i in range(len(origin_pred)):
+        item = origin_pred[i]
+        res.append(item[0])
+    return res
+
+
 def _translate(input_text):
 
     cut = cut_input(input_text,'lst')
@@ -105,7 +113,8 @@ def _translate(input_text):
     )
 
     # output_str = prediction[0][0]
-    output_lst = prediction[0]
+    # output_lst = prediction[0]
+    output_lst = _unzip_list(prediction)
     output_str = '/'.join(output_lst)
     print('ori = {}'.format(output_str))
     # replace entity
