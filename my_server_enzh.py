@@ -140,7 +140,7 @@ def tran_en2zh_interface():
     score,pred = _translate(input)
     print(' score = %s , pred = %s ' % (str(score), str(pred)))
     res = {
-      "output": pred.decode('unicode_escape')
+      "output": pred.decode('utf-8')
     }
     return json.dumps(res)
 
