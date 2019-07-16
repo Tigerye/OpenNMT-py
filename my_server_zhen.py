@@ -27,31 +27,10 @@ from translate_proc import PrePostProc
 import codecs
 from subword_nmt.apply_bpe import BPE
 
+import str_utils
+
 
 app = Flask(__name__)
-
-
-# def main(opt):
-#     ArgumentParser.validate_translate_opts(opt)
-#     logger = init_logger(opt.log_file)
-#
-#     translator = build_translator(opt, report_score=True)
-#     src_shards = split_corpus(opt.src, opt.shard_size)
-#     tgt_shards = split_corpus(opt.tgt, opt.shard_size) \
-#         if opt.tgt is not None else repeat(None)
-#     shard_pairs = zip(src_shards, tgt_shards)
-#
-#     for i, (src_shard, tgt_shard) in enumerate(shard_pairs):
-#         logger.info("Translating shard %d." % i)
-#         print()
-#         translator.translate(
-#             src=src_shard,
-#             tgt=tgt_shard,
-#             src_dir=opt.src_dir,
-#             batch_size=opt.batch_size,
-#             attn_debug=opt.attn_debug
-#             )
-
 
 
 def _get_parser():
@@ -71,7 +50,7 @@ def _get_translator(opt):
 
 def _get_input_func(input_str):
     tmp_list = list()
-    tmp_list.append(input_str)
+    tmp_list.extend(input_str)
     for item in tmp_list:
       yield item
     return
@@ -89,21 +68,34 @@ def merge_dict(a,b):
             a[k] = b[k]
     return a
 
-def _translate(input_text):
-    cut = cut_input(input_text,'lst')
 
+def _bpe_proc_lines(input_lst):
+    res = []
+    for item in input_lst:
+        res.append(bpe.process_line(item))
+    return res
+
+
+def _translate(input_text):
+
+    cut = cut_input(input_text,'lst')
+    # replace entity
     cuted, rep2val = proc.pre_proc_zh_py(cut)
     tmp_cut_str = ' '.join(cuted)
     tmp_cut_str, rep2val_nu = proc.pre_proc_zh_nu(tmp_cut_str)
 
     rep2val = merge_dict(rep2val,rep2val_nu)
     print(' rep2val = {}'.format(rep2val))
-
-    tmp_cut_str = bpe.process_line(tmp_cut_str)
-    print('bpe-res = {}'.format(tmp_cut_str))
-    cut = tmp_cut_str.split()
-    print('cut = {}'.format(cut))
-    cut_gen = _get_input_func(cut)
+    # split sentence
+    tmp_sents = str_utils.split_as_sentence(tmp_cut_str,type='zh')
+    # bpe
+    # tmp_cut_str = bpe.process_line(tmp_cut_str)
+    tmp_bpes = _bpe_proc_lines(tmp_sents)
+    print('bpe-res = {}'.format(tmp_bpes))
+    # cut = tmp_cut_str.split()
+    # print('cut = {}'.format(cut))
+    # infer
+    cut_gen = _get_input_func(tmp_bpes)
     score,prediction = translator.translate(
       src=cut_gen,
       tgt=None,
@@ -112,15 +104,18 @@ def _translate(input_text):
       attn_debug=opt.attn_debug
     )
 
-    output_str = prediction[0][0]
+    # output_str = prediction[0][0]
+    output_lst = prediction[0]
+    output_str = '/'.join(output_lst)
     print('ori = {}'.format(output_str))
+    # replace entity
     output_str = proc.post_proc(output_str,rep2val)
     print('rep ent = {}'.format(output_str))
+    # bpe decode
     output_str = proc.proc_bpe(output_str)
     print('rep bpe = {}'.format(output_str))
 
     return score,output_str
-
 
 
 @app.route('/translate/zh2en/',methods=['GET','POST'])

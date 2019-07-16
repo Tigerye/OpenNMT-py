@@ -24,6 +24,10 @@ from toolkit.cut_zh_corpus import cut_input
 import json
 import codecs
 from  subword_nmt.apply_bpe import BPE
+from translate_proc import PrePostProc
+
+import str_utils
+
 
 
 app = Flask(__name__)
@@ -66,24 +70,35 @@ def _get_translator(opt):
     return translator
 
 
-def _get_input_func(input_str):
+def _get_input_func(input_lst):
     tmp_list = list()
-    tmp_list.append(input_str)
+    tmp_list.extend(input_lst)
     for item in tmp_list:
       yield item
     return
+
+
+def _bpe_proc_lines(input_lst):
+    res = []
+    for item in input_lst:
+        res.append(bpe.process_line(item))
+    return res
 
 opt = None
 translator = None
 logger = None
 bpe = None
+proc = None
 
 
 def _translate(input_text):
     # cut = cut_input(input_text)
-    cut = input_text
-    cut = bpe.process_line(cut)
+    cut = str_utils.split_as_sentence(input_text, type='en')
+    # bpe
+    # cut = bpe.process_line(cut)
+    cut = _bpe_proc_lines(cut)
     print('bpe = {}'.format(cut))
+
     cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
       src=cut_gen,
@@ -92,6 +107,17 @@ def _translate(input_text):
       batch_size=opt.batch_size,
       attn_debug=opt.attn_debug
     )
+
+    output_lst = prediction[0]
+    output_str = '/'.join(output_lst)
+    print('ori = {}'.format(output_str))
+    # replace entity
+    # output_str = proc.post_proc(output_str, rep2val)
+    # print('rep ent = {}'.format(output_str))
+    # bpe decode
+    output_str = proc.proc_bpe(output_str)
+    print('rep bpe = {}'.format(output_str))
+
     return score,prediction
 
 
@@ -125,6 +151,9 @@ if __name__ == '__main__':
     sp = '@@'
     voc = None
     bpe = BPE(c, m, sp, voc, None)
+
+    proc = PrePostProc()
+    proc.load_data('py_ent_dict.txt')
 
     app.debug = True
     app.run(host='0.0.0.0',port=5001)
