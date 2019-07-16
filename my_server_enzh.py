@@ -142,7 +142,7 @@ def tran_en2zh_interface():
     res = {
       "output": pred
     }
-    return json.dumps(res).encode('utf-8')
+    return json.dumps(res).encode('gbk')
 
 
 if __name__ == '__main__':
