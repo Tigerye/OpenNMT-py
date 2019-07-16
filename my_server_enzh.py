@@ -117,7 +117,7 @@ def _translate(input_text):
     )
 
     output_lst = _unzip_list(prediction)
-    output_str = '/'.join(output_lst)
+    output_str = ' '.join(output_lst)
     print('ori = {}'.format(output_str))
     # replace entity
     # output_str = proc.post_proc(output_str, rep2val)
@@ -140,7 +140,7 @@ def tran_en2zh_interface():
     score,pred = _translate(input)
     print(' score = %s , pred = %s ' % (str(score), str(pred)))
     res = {
-      "output": pred[0][0]
+      "output": pred
     }
     return json.dumps(res)
 
