@@ -134,6 +134,7 @@ def _translate(input_text):
     print(cut)
     # tokenize
     cut = _tokenize_proc_lines(cut)
+    print('tok = {}'.format(cut))
     # bpe
     cut = _bpe_proc_lines(cut)
     print('bpe = {}'.format(cut))
