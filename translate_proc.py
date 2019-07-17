@@ -20,6 +20,16 @@ unit_map = {"元":"yuan", "美元":"dollars", "千克":"kg", "公里":"km", "米
                         "秒":"seconds", "磅":"pounds","盎司":"ounces", "加仑":"gallon","夸脱":"quarts", "品脱":"pints","升":"liter","美分":"cents","英里":"miles", "%":"%", \
                         "英尺":"feet", "英尺":"inch", "码":"yard", "毫升":"ml", "平方英寸":"square inch", "平方英尺":"square feet", "英亩":"acre", "英里每小时":"mile per hour", "km / h":"km / h"}
 
+def reverse_map(m):
+    ret = {}
+    for key, val in m.items():
+        ret[val] = key
+    return ret
+
+
+unit_map_reversed = reverse_map(unit_map)
+
+
 class PrePostProc(object):
 
     def __init__(self):
@@ -147,6 +157,7 @@ class PrePostProc(object):
         for key in unit_map.keys():
             if key in zh_input:
                 zh_quantity_list = self.loc_unit_quantity(zh_input, key)
+                to_replace_unit = " " + unit_map[key]
                 for zh_index in zh_quantity_list:
                     if len(seen) == 30:
                         print("more than 30 nu symbols in sentence: {}".format(zh_input))
@@ -155,11 +166,9 @@ class PrePostProc(object):
                     unk = " <@nu" + str(num) + "@> "
                     zh_q = zh_input[zh_index[0]: zh_index[1]]
                     zh_n = re.findall(pattern2, zh_q)[0]
-                    if zh_n in preproc_map.keys():
-                        original = preproc_map[zh_n]
-                        ret_map[unk] = re.sub(zh_n, original, "".join(zh_input_list[zh_index[0]:zh_index[1]]))
-                    else:
-                        ret_map[unk] = "".join(zh_input_list[zh_index[0]:zh_index[1]])
+                    to_replace = "".join(zh_input_list[zh_index[0]:zh_index[1]])
+                    to_replace = re.sub(key, to_replace_unit, to_replace)
+                    ret_map[unk] = to_replace
                     zh_input_list = zh_input_list[:zh_index[0]] + [unk] + \
                                     [''] * ((zh_index[1] - zh_index[0]) - 1) + zh_input_list[zh_index[1]:]
         zh_input = "".join(zh_input_list)
@@ -179,19 +188,19 @@ class PrePostProc(object):
         for val in unit_map.values():
             if val in en_input:
                 en_quantity_list = self.loc_unit_quantity(en_input, val)
+                to_replace_unit = unit_map_reversed[val]
                 for en_index in en_quantity_list:
                     if len(seen) == 30:
                         print("more than 30 nu symbols in sentence: {}".format(zh_input))
                         return None, None
-                    en_q = en_input[en_index[0]: en_index[1]]
-                    en_n = re.findall(pattern2, en_q)[0]
                     num, seen = generate_random(seen, 30)
                     unk = " <@nu" + str(num) + "@> "
-                    if en_n in preproc_map.keys():
-                        original = preproc_map[en_n]
-                        ret_map[unk] = re.sub(en_n, original, "".join(en_input_list[en_index[0]:en_index[1]]))
-                    else:
-                        ret_map[unk] = "".join(en_input_list[en_index[0]:en_index[1]])
+                    en_q = en_input[en_index[0]: en_index[1]]
+                    en_n = re.findall(pattern2, en_q)[0]
+                    to_replace = "".join(en_input_list[en_index[0]:en_index[1]])
+                    to_replace = re.sub(val, to_replace_unit, to_replace)
+                    print(to_replace)
+                    ret_map[unk] = to_replace
                     en_input_list = en_input_list[:en_index[0]] + [unk] + \
                                         [''] * ((en_index[1] - en_index[0]) - 1) + en_input_list[en_index[1]:]
         en_input = "".join(en_input_list)
@@ -305,7 +314,7 @@ class PrePostProc(object):
         return input_string, unk_map
 
 
-    def pre_proc_zh_nu(self,  input_str):
+    def pre_proc_zh_nu1(self,  input_str):
         # num_res = re.findall(r'\d+|<@sp\d{1,3}@>|[零一二三四五六七八九十百千万亿兆]+|<@nu.*@>]',)
         # for item in num_res:
         input_str,rep_map = self.replace_num(input_str)
@@ -454,7 +463,7 @@ if __name__ == '__main__':
         }
     p.set_data(a)
 
-    s, m = p.pre_proc_en_py(input.split(" "))
+    s, m = p.pre_proc_en_nu(input)
     print(s)
     print(m)
     """
