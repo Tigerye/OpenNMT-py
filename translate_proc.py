@@ -327,38 +327,24 @@ class PrePostProc(object):
                 ret.append(item[0])
         return ret
 
-
-    def pre_proc_py(self, input_token):
-        # input_token = list(jieba.cut(input_str))
-        # print('input = {}'.format(input_token))
+    def pre_proc_en_py(self, input_token):
         matched = list()
         rep2val = dict()
-        zh_flag = isChinese(' '.join(input_token))
-
-
-
-        if not zh_flag:
-            name_list = self.name_tag_list(" ".join(input_token))
+        name_list = self.name_tag_list(" ".join(input_token))
 
         for sub_window_size in range(1, 9):
             tmp_sliding = sliding_it(input_token, sub_window_size)
             for item in tmp_sliding:
                 k1 = item[0]
-                if zh_flag:
-                    if k1 in self._key2val.keys():
-                        new_item = (item[0], item[1], item[2], k1)
-                        matched.append(new_item)
+                if k1 in self._val2key.keys():
+                    new_item = (item[0], item[1], item[2], k1)
+                    matched.append(new_item)
                 else:
-                    if k1 in self._val2key.keys():
-                        new_item = (item[0], item[1], item[2], k1)
-                        matched.append(new_item)
-                    else:
-                        for name in name_list:
-                            name = "".join(name.split(" "))
-                            if name == k1:
-                                new_item = (item[0], item[1], item[2], k1)
-                                matched.append(new_item)
-
+                    for name in name_list:
+                        name1 = "".join(name.split(" "))
+                        if name == k1 or name1 == k1:
+                            new_item = (item[0], item[1], item[2], k1)
+                            matched.append(new_item)
 
         no_dup = filter_overlap(matched)
 
@@ -375,17 +361,58 @@ class PrePostProc(object):
                     rand_cnt +=1
                     continue
                 else:
-                    if zh_flag:
-                        rep2val[tmp_rep] = self._key2val[item[3]]
-                        replaced_str = tmp_rep
-                        break
+                    if item[3] in self._val2key.keys():
+                        rep2val[tmp_rep] = self._val2key[item[3]]
                     else:
-                        if item[3] in self._val2key.keys():
-                            rep2val[tmp_rep] = self._val2key[item[3]]
-                        else:
-                            rep2val[tmp_rep] = item[3]
-                        replaced_str = tmp_rep
-                        break
+                        rep2val[tmp_rep] = item[3]
+                    replaced_str = tmp_rep
+                    break
+            input_token = self._rep_in_lst(input_token, item[1], item[2], replaced_str)
+
+        res_token = list()
+        for i in range(len(input_token)):
+            tmp = input_token[i]
+            if tmp == '':
+                continue
+            else:
+                res_token.append(tmp)
+
+        return res_token, rep2val
+
+
+    def pre_proc_zh_py(self, input_token):
+        # input_token = list(jieba.cut(input_str))
+        # print('input = {}'.format(input_token))
+        matched = list()
+        rep2val = dict()
+
+        for sub_window_size in range(1, 9):
+            tmp_sliding = sliding_it(input_token, sub_window_size)
+            for item in tmp_sliding:
+                k1 = item[0]
+                if k1 in self._key2val.keys():
+                    new_item = (item[0], item[1], item[2], k1)
+                    matched.append(new_item)
+
+        no_dup = filter_overlap(matched)
+
+        for item in no_dup:
+
+            rand_cnt = 0
+            replaced_str = None
+            while rand_cnt < 10:
+
+                tmp_seed = random.randint(0,29)
+                tmp_rep = self._py_tpl % tmp_seed
+
+                if tmp_rep in rep2val.keys():
+                    rand_cnt +=1
+                    continue
+                else:
+                    rep2val[tmp_rep] = self._key2val[item[3]]
+                    replaced_str = tmp_rep
+                    break
+
             # tmp_id = self._pre_key2id[item[3]]
             # tmp_val = self._vals[tmp_id]
             # replaced_str = tmp_val
@@ -427,7 +454,7 @@ if __name__ == '__main__':
         }
     p.set_data(a)
 
-    s, m = p.pre_proc_py(input)
+    s, m = p.pre_proc_en_py(input.split(" "))
     print("ner: {}".format(p.spacy_ner(input)))
     print("out per: {}".format(p.name_tag_list(input)))
     print(s)
