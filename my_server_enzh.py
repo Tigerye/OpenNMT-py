@@ -27,6 +27,7 @@ from  subword_nmt.apply_bpe import BPE
 from translate_proc import PrePostProc
 
 import str_utils
+import nltk
 
 
 
@@ -84,6 +85,16 @@ def _bpe_proc_lines(input_lst):
         res.append(bpe.process_line(item))
     return res
 
+
+def _tokenize_proc_lines(input_lst):
+    res = []
+    for item in input_lst:
+        item_ = ' '.join(nltk.word_tokenize(item))
+        if len(item_) != 0:
+            res.append(item_)
+    return res
+
+
 opt = None
 translator = None
 logger = None
@@ -102,8 +113,10 @@ def _unzip_list(origin_pred):
 def _translate(input_text):
     # cut = cut_input(input_text)
     cut = str_utils.split_as_sentence(input_text, type='en')
+    print(cut)
+    # tokenize
+    cut = _tokenize_proc_lines(cut)
     # bpe
-    # cut = bpe.process_line(cut)
     cut = _bpe_proc_lines(cut)
     print('bpe = {}'.format(cut))
 
@@ -129,7 +142,7 @@ def _translate(input_text):
     return score,output_str
 
 
-@app.route('/translate/en2zh/',methods=['GET','POST'])
+@app.route('/translate/en2zh/', methods=['GET', 'POST'])
 def tran_en2zh_interface():
     if request.method == 'POST':
         data = request.get_data()

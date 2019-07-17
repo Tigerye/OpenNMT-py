@@ -72,7 +72,9 @@ def merge_dict(a,b):
 def _bpe_proc_lines(input_lst):
     res = []
     for item in input_lst:
-        res.append(bpe.process_line(item))
+        item_ = bpe.process_line(item)
+        if len(item_) > 0:
+            res.append(item_)
     return res
 
 
@@ -163,4 +165,4 @@ if __name__ == '__main__':
     bpe = BPE(c, m, sp, voc, None)
 
     app.debug = True
-    app.run(host='0.0.0.0',port=5000)
+    app.run(host='0.0.0.0',port=5000, extra_files=['py_ent_dict.txt'])
