@@ -323,7 +323,7 @@ class PrePostProc(object):
         zh_input_ner = self.spacy_ner(zh_input)
         ret = []
         for item in zh_input_ner:
-            if item[3] == 'PERSON':
+            if item[3] == 'PERSON' or item[3] == 'ORG':
                 ret.append(item[0])
         return ret
 
@@ -446,7 +446,7 @@ class PrePostProc(object):
 if __name__ == '__main__':
     input1 = '金逸影视营收额为100,000亿元，截止2018年1月31号'
     tk = list(jieba.cut(input1))
-    input = 'jinyi cinema makes 10 billion dollars every year, until 01/31/2018, and my name is Sicheng Tang'
+    input = 'Google makes 10 billion dollars every year, until 01/31/2018, and my name is Sicheng Tang'
     p = PrePostProc()
     a= {
         '北京':'beijing',
@@ -455,8 +455,6 @@ if __name__ == '__main__':
     p.set_data(a)
 
     s, m = p.pre_proc_en_py(input.split(" "))
-    print("ner: {}".format(p.spacy_ner(input)))
-    print("out per: {}".format(p.name_tag_list(input)))
     print(s)
     print(m)
     """

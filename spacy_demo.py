@@ -6,7 +6,13 @@ input2 = 'The purchase of electric cars before April 15 is not immediately prohi
 input3 = 'Beijing Business Daily reporter Chen Tingting , Li Haojie / Wen Songyuan / Cartoon'
 input4 = 'Wang Xiangnan , secretary-general of the Insurance and Economic Development Research Center of the Chinese Academy of Social Sciences , said that liability insurance is a relatively underdeveloped area of China &apos;s insurance market and has great market potential .'
 input5 = "Hi, my name is Sicheng Tang"
-test_set = [input1, input2, input3, input4, input5]
+input6 = "I work for an O2O company called Girosahggs"
+input7 = "Oh I see, you don't want to buy from Apple anymore"
+input8 = "It is rumored around that Facebook just released Libraaa"
+input9 = "University of California sucks"
+input0 = "The government of China forbid its citizens to go to WTO"
+
+test_set = [input6, input7, input8, input9, input0]
 
 
 def spacy_ner(sentence):
@@ -21,7 +27,6 @@ for sentence in test_set:
     doc = nlp(sentence)
     print(sentence)
     for ent in doc.ents:
-        print(type(ent.start_char))
         print(ent.text, ent.start_char, ent.end_char, ent.label_)
 
 

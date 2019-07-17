@@ -1,2 +1,4 @@
 北京	beijing
 金逸	jinyi
+美团点评	meituandianping
+点评	dianping
