@@ -320,17 +320,12 @@ class PrePostProc(object):
         return ret
 
     def name_tag_list(self, zh_input):
-        print(zh_input)
         zh_input_ner = self.spacy_ner(zh_input)
         ret = []
-        print(zh_input_ner)
         for item in zh_input_ner:
-            print(item[3])
             if item[3] == 'PERSON':
-                self._key2val[item[0]] = item[0]
-                self._key2val[''.join(item[0].split(' '))] = ''.join(item[0].split(' '))
-                self._val2key[item[0]] = item[0]
-                self._val2key[''.join(item[0].split(' '))] = ''.join(item[0].split(' '))
+                ret.append(item[0])
+        return ret
 
 
     def pre_proc_py(self, input_token):
@@ -340,8 +335,10 @@ class PrePostProc(object):
         rep2val = dict()
         zh_flag = isChinese(' '.join(input_token))
 
+
+
         if not zh_flag:
-            self.name_tag_list(" ".join(input_token))
+            name_list = self.name_tag_list(" ".join(input_token))
 
         for sub_window_size in range(1, 9):
             tmp_sliding = sliding_it(input_token, sub_window_size)
@@ -355,6 +352,12 @@ class PrePostProc(object):
                     if k1 in self._val2key.keys():
                         new_item = (item[0], item[1], item[2], k1)
                         matched.append(new_item)
+                    else:
+                        for name in name_list:
+                            name = "".join(name.split(" "))
+                            if name == k1:
+                                new_item = (item[0], item[1], item[2], k1)
+                                matched.append(new_item)
 
 
         no_dup = filter_overlap(matched)
@@ -424,7 +427,7 @@ if __name__ == '__main__':
         }
     p.set_data(a)
 
-    s, m = p.pre_proc_py(tk)
+    s, m = p.pre_proc_py(input)
     print("ner: {}".format(p.spacy_ner(input)))
     print("out per: {}".format(p.name_tag_list(input)))
     print(s)
