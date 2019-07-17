@@ -28,7 +28,7 @@ from translate_proc import PrePostProc
 
 import str_utils
 import nltk
-
+import jieba
 
 
 app = Flask(__name__)
@@ -95,6 +95,13 @@ def _tokenize_proc_lines(input_lst):
     return res
 
 
+def merge_dict(a,b):
+    for k in b.keys():
+        if not k in a.keys():
+            a[k] = b[k]
+    return a
+
+
 opt = None
 translator = None
 logger = None
@@ -111,8 +118,19 @@ def _unzip_list(origin_pred):
 
 
 def _translate(input_text):
+
+    cut = list(jieba.cut(input_text))
+
+    # replace entity
+    cuted, rep2val = proc.pre_proc_en_py(cut)
+    tmp_cut_str = ' '.join(cuted)
+    tmp_cut_str, rep2val_nu = proc.pre_proc_en_nu(tmp_cut_str)
+
+    rep2val = merge_dict(rep2val, rep2val_nu)
+    print(' rep2val = {}'.format(rep2val))
+
     # cut = cut_input(input_text)
-    cut = str_utils.split_as_sentence(input_text, type='en')
+    cut = str_utils.split_as_sentence(tmp_cut_str, type='en')
     print(cut)
     # tokenize
     cut = _tokenize_proc_lines(cut)
@@ -133,8 +151,8 @@ def _translate(input_text):
     output_str = ' '.join(output_lst)
     print('ori = {}'.format(output_str))
     # replace entity
-    # output_str = proc.post_proc(output_str, rep2val)
-    # print('rep ent = {}'.format(output_str))
+    output_str = proc.post_proc(output_str, rep2val)
+    print('rep ent = {}'.format(output_str))
     # bpe decode
     output_str = proc.proc_bpe(output_str)
     print('rep bpe = {}'.format(output_str))
