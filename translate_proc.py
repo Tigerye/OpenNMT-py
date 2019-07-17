@@ -248,19 +248,19 @@ class PrePostProc(object):
         en_input = self.recover_unk(en_input, en_retmap)
         return en_input, ret_map
 
-    def pre_proc_nu(self, input_str):
-        if isChinese(input_str):
-            zh_input, ret_map, seen = self.replace_unit_zh(input_str)
-            if zh_input is None and ret_map is None:
-                return zh_input, ret_map
-            zh_input, ret_map = self.replace_num_zh(zh_input, seen, ret_map)
+    def pre_proc_zh_nu(self, input_str):
+        zh_input, ret_map, seen = self.replace_unit_zh(input_str)
+        if zh_input is None and ret_map is None:
             return zh_input, ret_map
-        else:
-            en_input, ret_map, seen = self.replace_unit_en(input_str)
-            if en_input is None and ret_map is None:
-                return en_input, ret_map
-            en_input, ret_map = self.replace_num_en(en_input, seen, ret_map)
+        zh_input, ret_map = self.replace_num_zh(zh_input, seen, ret_map)
+        return zh_input, ret_map
+
+    def pre_proc_en_nu(self, input_str):
+        en_input, ret_map, seen = self.replace_unit_en(input_str)
+        if en_input is None and ret_map is None:
             return en_input, ret_map
+        en_input, ret_map = self.replace_num_en(en_input, seen, ret_map)
+        return en_input, ret_map
 
 
     def replace_num(input_string):
