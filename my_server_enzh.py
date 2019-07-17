@@ -86,13 +86,9 @@ def _bpe_proc_lines(input_lst):
     return res
 
 
-def _tokenize_proc_lines(input_lst):
-    res = []
-    for item in input_lst:
-        item_ = ' '.join(nltk.word_tokenize(item))
-        if len(item_) != 0:
-            res.append(item_)
-    return res
+def _tokenize_proc_lines(input_str):
+    item_ = ' '.join(nltk.word_tokenize(input_str))
+    return item_
 
 
 def merge_dict(a,b):
@@ -119,7 +115,11 @@ def _unzip_list(origin_pred):
 
 def _translate(input_text):
 
-    cut = list(jieba.cut(input_text))
+    # tokenize
+    cut = _tokenize_proc_lines(input_text)
+    print('tok = {}'.format(cut))
+    # split 2 list
+    cut = cut.split()
 
     # replace entity
     cuted, rep2val = proc.pre_proc_en_py(cut)
@@ -131,10 +131,13 @@ def _translate(input_text):
 
     # cut = cut_input(input_text)
     cut = str_utils.split_as_sentence(tmp_cut_str, type='en')
+    tmp = []
+    for item in cut:
+        if len(item) != 0:
+            tmp.append(item)
+    cut = tmp
     print(cut)
-    # tokenize
-    cut = _tokenize_proc_lines(cut)
-    print('tok = {}'.format(cut))
+
     # bpe
     cut = _bpe_proc_lines(cut)
     print('bpe = {}'.format(cut))
