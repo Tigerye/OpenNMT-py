@@ -16,7 +16,7 @@ import spacy
 nlp = spacy.load('en_core_web_sm')
 sp_pattern = r"<@sp\d{1,3}@>"
 pattern = r'\d+|[零一二三四五六七八九十百千万亿兆]+'
-unit_map = {"元":"yuan", "美元":"dollars", "千克":"kg", "公里":"km", "米":"meters", "厘米":"cm","吨":"tons", "克":"grams", "小时":"hours", "分钟":"minutes", \
+unit_map = {"百万":"baiwan", "亿":"yibillion", "千":"qianthousand", "万":"wanthousand","元":"yuan", "美元":"dollars", "千克":"kg", "公里":"km", "米":"meters", "厘米":"cm","吨":"tons", "克":"grams", "小时":"hours", "分钟":"minutes", \
                         "秒":"seconds", "磅":"pounds","盎司":"ounces", "加仑":"gallon","夸脱":"quarts", "品脱":"pints","升":"liter","美分":"cents","英里":"miles", "%":"%", \
                         "英尺":"feet", "英尺":"inch", "码":"yard", "毫升":"ml", "平方英寸":"square inch", "平方英尺":"square feet", "英亩":"acre", "英里每小时":"mile per hour", "km / h":"km / h"}
 
@@ -199,7 +199,8 @@ class PrePostProc(object):
                     en_n = re.findall(pattern2, en_q)[0]
                     to_replace = "".join(en_input_list[en_index[0]:en_index[1]])
                     to_replace = re.sub(val, to_replace_unit, to_replace)
-                    print(to_replace)
+                    print("to_replace: {}".format(to_replace))
+                    to_replace = "".join(to_replace.split(" "))
                     ret_map[unk] = to_replace
                     en_input_list = en_input_list[:en_index[0]] + [unk] + \
                                         [''] * ((en_index[1] - en_index[0]) - 1) + en_input_list[en_index[1]:]
@@ -455,7 +456,7 @@ class PrePostProc(object):
 if __name__ == '__main__':
     input1 = '金逸影视营收额为100,000亿元，截止2018年1月31号'
     tk = list(jieba.cut(input1))
-    input = 'Google makes 10 billion dollars every year, until 01/31/2018, and my name is Sicheng Tang'
+    input = 'Google makes 12 thousands inch every year, until 01/31/2018, and my name is Sicheng Tang'
     p = PrePostProc()
     a= {
         '北京':'beijing',
@@ -464,6 +465,7 @@ if __name__ == '__main__':
     p.set_data(a)
 
     s, m = p.pre_proc_en_nu(input)
+    print(input)
     print(s)
     print(m)
     """

@@ -165,6 +165,56 @@ def text2int_en (textnum, numwords={}):
 
     return curstring
 
+def combine_num_en_inf(input_string, mapp = None):
+    scales = ["hundred", "thousand", "million", "billion", "trillion", \
+    "hundreds", "thousands", "millions", "billions", "trillions"]
+    scale_map = {"hundred":100, "thousand":[0.1, "wanthousand"], "million":[100, "wanthousand"], \
+    "billion":[10, "yibillion"], "trillion":1000000000000}
+    input_list = input_string.split(" ")
+    pattern = r'\d[\d.,]*\d|[0-9]'
+    for i in range(1, len(input_list)):
+        if input_list[i] in scales:
+            if re.match(pattern, input_list[i-1]):
+                scale = input_list[i]
+                try:
+                    num = float(input_list[i-1].replace(',',''))
+                    if num == int(num):
+                        num = int(num)
+                except:
+                    continue
+                if scale[-1] == 's':
+                    scale = scale[:-1]
+                scale_num = scale_map[scale]
+                try:
+                    if scale == "billion" or scale == "million":
+                        if float(scale_num[0] * num) == int(scale_num[0] * num):
+                            res = str(int(scale_num[0] * num)) + scale_num[1]
+                        else:
+                            res = str(float(scale_num[0] * num)) + scale_num[1]
+                    elif scale == "thousand":
+                        if num >= 10:
+                            if float(num / 10) == int(num/10):
+                                res = str(int(num / 10)) + scale_num[1]
+                            else:
+                                res = str(float(num / 10)) + scale_num[1]
+                        else:
+                            if float(num) == int(num):
+                                res = str(int(num)) + "qianthousand"
+                            else:
+                                res = str(float(num)) + "qianthousand"
+
+                    else:
+                        res = str(int(scale_num * num))
+                except:
+                    continue
+                if mapp is not None:
+                    mapp[res] = input_list[i-1] + " " + input_list[i]
+                input_list[i] = res
+                input_list[i-1] = ""
+    if mapp is not None:
+        return ' '.join(input_list), mapp
+    return ' '.join(input_list)
+
 
 def combine_num_en(input_string, mapp = None):
     scales = ["hundred", "thousand", "million", "billion", "trillion", \
@@ -234,7 +284,7 @@ def num_preproc_en(input_string, map_flag = False):
         except:
             input_string = input_string
         try:
-            input_string, ret_map = combine_num_en(input_string, ret_map)
+            input_string, ret_map = combine_num_en_inf(input_string, ret_map)
         except:
             input_string = input_string
         return input_string, ret_map
@@ -631,7 +681,6 @@ class DataCleanser(object):
         en_input_list = list(en_input)
         zh_input_list = list(zh_input)
         for key in self.unit_map.keys():
-            print("seen length: {}".format(len(seen)))
             if key in zh_input and self.unit_map[key] in en_input:
                 zh_quantity_list = self.loc_unit_quantity(zh_input, key)
                 en_quantity_list = self.loc_unit_quantity(en_input, self.unit_map[key])
@@ -724,7 +773,6 @@ class DataCleanser(object):
                 print("In line {}, detected more than 30 unks".format(line_count))
                 return None, None
         if Units:
-            print("Entered Units")
             zh_input, en_input, seen = self.replace_units(zh_input, en_input, line_count)
             print("not units")
             if zh_input == None and en_input == None:
