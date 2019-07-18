@@ -19,6 +19,11 @@ pattern = r'\d+|[零一二三四五六七八九十百千万亿兆]+'
 unit_map = {"百万":"baiwan", "亿":"yibillion", "千":"qianthousand", "万":"wanthousand","元":"yuan", "美元":"dollars", "千克":"kg", "公里":"km", "米":"meters", "厘米":"cm","吨":"tons", "克":"grams", "小时":"hours", "分钟":"minutes", \
                         "秒":"seconds", "磅":"pounds","盎司":"ounces", "加仑":"gallon","夸脱":"quarts", "品脱":"pints","升":"liter","美分":"cents","英里":"miles", "%":"%", \
                         "英尺":"feet", "英尺":"inch", "码":"yard", "毫升":"ml", "平方英寸":"square inch", "平方英尺":"square feet", "英亩":"acre", "英里每小时":"mile per hour", "km / h":"km / h"}
+ent_address = "rm-uf67jlfy9n338fqa5.mysql.rds.aliyuncs.com"
+ent_database = "rt"
+ent_username = "rt"
+ent_password = "jUOcnRR6ZoZ5"
+
 
 def reverse_map(m):
     ret = {}
@@ -33,10 +38,55 @@ unit_map_reversed = reverse_map(unit_map)
 class PrePostProc(object):
 
     def __init__(self):
-        self._key2val = dict()
-        self._val2key = dict()
+        self._key2val = self.LoadEntityDict(ent_address, ent_database, ent_username, ent_password)
+        self._val2key = self.form_val2key()
         self._py_tpl = '<@sp%s@>'
         self._nu_tpl = '<@nu%s@>'
+
+    def form_val2key(self):
+        ret = {}
+        for key, val in self._key2val.items():
+            for v in val:
+                ret[v] = key
+        return ret
+
+    def LoadEntityDict(self, address, database, username, password):
+        """address:rm-uf67jlfy9n338fqa5.mysql.rds.aliyuncs.com
+           database: rt
+           username: rt
+           password: jUOcnRR6ZoZ5
+           key of the map is the Chinese name and val is a list of English names including alias if available
+        """
+        entity_map = defaultdict(lambda : [])
+        db = ps.connect(address, username, password, database)
+        cursor = db.cursor()
+        command1 = "select ent_keys, ent_val, type from zh_en_ent"
+        command2 = "select alias, cn_name, en_name, type from entity"
+        command3 = "select ent_keys, ent_val, type from en_zh_ent"
+        cursor.execute(command1)
+        for row in cursor.fetchall():
+            if row[2] == 1 or row[0] == row[1] or row[1] is None or row[0] is None:
+                continue
+            for key in row[0].split(';'):
+                entity_map[key].append(row[1])
+        cursor.execute(command2)
+        for row in cursor.fetchall():
+            if row[1] == row[2] or row[1] is None or row[3] == 1 or row[2] is None:
+                continue
+            entity_map[row[1]] += row[2].split(";")
+            if row[0] is not None:
+                entity_map[row[1]] += row[0].split(';')
+        cursor.execute(command3)
+        for row in cursor.fetchall():
+            if row[2] == 2 or row[0] == row[1] or row[1] is None or row[0] is None:
+                continue
+            entity_map[row[1]] += row[0].split(";")
+        for key in entity_map.keys():
+            val = entity_map[key]
+            val = list(set(val))
+            val = sorted(val, key = lambda a : -len(a))
+            entity_map[key] = val
+        return entity_map
 
     def load_data(self, path):
         for line in open(path):
@@ -341,6 +391,7 @@ class PrePostProc(object):
         matched = list()
         rep2val = dict()
         name_list = self.name_tag_list(" ".join(input_token))
+        print("name_list: {}".format(name_list))
 
         for sub_window_size in range(1, 9):
             tmp_sliding = sliding_it(input_token, sub_window_size)
@@ -372,6 +423,7 @@ class PrePostProc(object):
                     continue
                 else:
                     if item[3] in self._val2key.keys():
+                        print("item[3]: {}".format(item[3]))
                         rep2val[tmp_rep] = self._val2key[item[3]]
                     else:
                         rep2val[tmp_rep] = item[3]
@@ -400,7 +452,9 @@ class PrePostProc(object):
             tmp_sliding = sliding_it(input_token, sub_window_size)
             for item in tmp_sliding:
                 k1 = item[0]
+                k1 = "".join(k1.split(" "))
                 if k1 in self._key2val.keys():
+                    print("inside if: {}".format(k1))
                     new_item = (item[0], item[1], item[2], k1)
                     matched.append(new_item)
 
@@ -419,7 +473,7 @@ class PrePostProc(object):
                     rand_cnt +=1
                     continue
                 else:
-                    rep2val[tmp_rep] = self._key2val[item[3]]
+                    rep2val[tmp_rep] = self._key2val[item[3]][0]
                     replaced_str = tmp_rep
                     break
 
@@ -454,20 +508,20 @@ class PrePostProc(object):
             self._val2key[val] = key
 
 if __name__ == '__main__':
-    input1 = '金逸影视营收额为100,000亿元，截止2018年1月31号'
+    input1 = '大洋集团营收额为100,000亿元，截止2018年1月31号'
     tk = list(jieba.cut(input1))
-    input = 'Google makes 12 thousands inch every year, until 01/31/2018, and my name is Sicheng Tang'
+    input = 'Ta Yang makes 12 thousands inch every year, until 01/31/2018, and my name is Sicheng Tang'
     p = PrePostProc()
     a= {
         '北京':'beijing',
         '金逸':'jinyi'
         }
-    p.set_data(a)
 
-    s, m = p.pre_proc_en_nu(input)
+    s, m = p.pre_proc_en_py(input.split(" "))
     print(input)
     print(s)
     print(m)
+    print(p._key2val["大洋集团"])
     """
     out_tk, rep=p.pre_proc_zh_py(tk)
     out_str = ' '.join(out_tk)

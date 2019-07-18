@@ -23,11 +23,12 @@ def sliding_it(input_token,window_size):
       item.append(base[real_index])
 
     item_str =''.join(item)
+    item_str_space =' '.join(item)
     if item_str.strip() == '':
       continue
     item_beg =i
     item_end =i+window_size-1
-    res.append((item_str,item_beg,item_end))
+    res.append((item_str_space,item_beg,item_end))
   return res
 
 
