@@ -213,7 +213,7 @@ class PrePostProc(object):
                         print("more than 30 nu symbols in sentence: {}".format(zh_input))
                         return None, None
                     num, seen = generate_random(seen, 30)
-                    unk = " <@nu" + str(num) + "@> "
+                    unk = "<@nu" + str(num) + "@>"
                     zh_q = zh_input[zh_index[0]: zh_index[1]]
                     zh_n = re.findall(pattern2, zh_q)[0]
                     to_replace = "".join(zh_input_list[zh_index[0]:zh_index[1]])
@@ -241,10 +241,10 @@ class PrePostProc(object):
                 to_replace_unit = unit_map_reversed[val]
                 for en_index in en_quantity_list:
                     if len(seen) == 30:
-                        print("more than 30 nu symbols in sentence: {}".format(zh_input))
+                        print("more than 30 nu symbols in sentence: {}".format(en_input))
                         return None, None
                     num, seen = generate_random(seen, 30)
-                    unk = " <@nu" + str(num) + "@> "
+                    unk = "<@nu" + str(num) + "@>"
                     en_q = en_input[en_index[0]: en_index[1]]
                     en_n = re.findall(pattern2, en_q)[0]
                     to_replace = "".join(en_input_list[en_index[0]:en_index[1]])
@@ -273,7 +273,7 @@ class PrePostProc(object):
             else:
                 continue
             num, seen = generate_random(seen, 30)
-            unk = " <@nu" + str(num) + "@> "
+            unk = "<@nu" + str(num) + "@>"
             ret_map[unk] = "".join(zh_input_list[zh_index[0]:zh_index[1]])
             zh_input_list = zh_input_list[:zh_index[0]] + [unk] + \
                             [''] * (len(target) - 1) + zh_input_list[zh_index[1]:]
@@ -298,7 +298,7 @@ class PrePostProc(object):
             else:
                 continue
             num, seen = generate_random(seen, 30)
-            unk = " <@nu" + str(num) + "@> "
+            unk = "<@nu" + str(num) + "@>"
             ret_map[unk] = "".join(en_input_list[en_index[0]:en_index[1]])
             en_input_list = en_input_list[:en_index[0]] + [unk] + \
                             [''] * (len(num_target) - 1) + en_input_list[en_index[1]:]
