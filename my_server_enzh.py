@@ -199,4 +199,4 @@ if __name__ == '__main__':
     proc.load_data('py_ent_dict.txt')
 
     app.debug = True
-    app.run(host='0.0.0.0',port=5001)
+    app.run(host='0.0.0.0',port=5002)
