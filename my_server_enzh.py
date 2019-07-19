@@ -136,7 +136,7 @@ def _translate(input_text):
         if len(item) != 0:
             tmp.append(item)
     cut = tmp
-    print(cut)
+    print('cut-sentence : {} '.format(cut))
 
     # bpe
     cut = _bpe_proc_lines(cut)
