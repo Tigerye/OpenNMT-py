@@ -273,8 +273,9 @@ class PrePostProc(object):
             else:
                 continue
             num, seen = generate_random(seen, 30)
-            unk = "<@nu" + str(num) + "@>"
-            ret_map[unk] = "".join(zh_input_list[zh_index[0]:zh_index[1]])
+            unk = " <@nu" + str(num) + "@> "
+            key_unk = "<@nu" + str(num) + "@>"
+            ret_map[key_unk] = "".join(zh_input_list[zh_index[0]:zh_index[1]])
             zh_input_list = zh_input_list[:zh_index[0]] + [unk] + \
                             [''] * (len(target) - 1) + zh_input_list[zh_index[1]:]
             zh_input = zh_input[:zh_index[0]] + " " * len(target) + \
@@ -298,8 +299,9 @@ class PrePostProc(object):
             else:
                 continue
             num, seen = generate_random(seen, 30)
-            unk = "<@nu" + str(num) + "@>"
-            ret_map[unk] = "".join(en_input_list[en_index[0]:en_index[1]])
+            unk = " <@nu" + str(num) + "@> "
+            key_unk = "<@nu" + str(num) + "@>"
+            ret_map[key_unk] = "".join(en_input_list[en_index[0]:en_index[1]])
             en_input_list = en_input_list[:en_index[0]] + [unk] + \
                             [''] * (len(num_target) - 1) + en_input_list[en_index[1]:]
             en_input = en_input[:en_index[0]] + " " * len(num_target) + \
