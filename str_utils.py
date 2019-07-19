@@ -93,7 +93,11 @@ def split_as_sentence(input_str, type =None):
     def _sp_en(in_str):
         res = []
         for item in split_single(in_str):
-            res.append(item)
+            if len(item) >= 50 :
+                sub_item = item.split(',')
+                res.extend(sub_item)
+            else:
+                res.append(item)
         return res
 
     def _sp_zh(in_str):
