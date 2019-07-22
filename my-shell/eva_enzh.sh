@@ -1,1 +1,1 @@
-perl /root/workspace/OpenNMT-py/tools/multi-bleu.perl /root/workspace/translate_data/my_corpus.zh.atok-v4-.test < /root/workspace/OpenNMT-py/mycorpus.v4-16w.test.pred.atok
+perl /root/workspace/OpenNMT-py/tools/multi-bleu.perl /root/workspace/translate_data/my_corpus_v6.zh-cut.processed6-bpe-v6-2-filter3.test < /root/workspace/OpenNMT-py/my-shell/model.v6-2_enzh-17w.test.pred.atok

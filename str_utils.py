@@ -7,6 +7,7 @@
 
 import re
 import jieba
+from nltk.tokenize import sent_tokenize
 
 from segtok.segmenter import split_single, split_multi, MAY_CROSS_ONE_LINE, \
     split_newline, rewrite_line_separators, ABBREVIATIONS, CONTINUATIONS, \
@@ -92,7 +93,7 @@ def is_all_en(input_str):
 def split_as_sentence(input_str, type =None):
     def _sp_en(in_str):
         res = []
-        for item in split_single(in_str):
+        for item in sent_tokenize(in_str):
             # if len(item) >= 50 :
             if len(item.split(" ")) >= 50:
                 sub_item = item.split(',')

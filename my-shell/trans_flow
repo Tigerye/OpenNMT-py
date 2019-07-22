@@ -1,0 +1,10 @@
+#train 
+sh process_zhen.sh
+
+sh run_zhen.sh
+
+#eva
+
+sh pred_zhen.sh
+
+sh eva_zhen.sh
