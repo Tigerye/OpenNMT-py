@@ -122,7 +122,10 @@ def _translate(input_text):
     cut = cut.split()
 
     # replace entity
+    print("cut you want: {}".format(" ".join(cut)))
     cuted, rep2val = proc.pre_proc_en_py(cut)
+    print("sp_str: {}".format(cuted))
+    print("sp_map: {}".format(rep2val))
     tmp_cut_str = ' '.join(cuted)
     tmp_cut_str, rep2val_nu = proc.pre_proc_en_nu(tmp_cut_str)
     print("input_text with unks: {}".format(tmp_cut_str))

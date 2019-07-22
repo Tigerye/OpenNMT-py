@@ -383,6 +383,7 @@ class PrePostProc(object):
 
     def name_tag_list(self, zh_input):
         zh_input_ner = self.spacy_ner(zh_input)
+        print(zh_input_ner)
         ret = []
         for item in zh_input_ner:
             if item[3] == 'PERSON' or item[3] == 'ORG':
@@ -512,7 +513,7 @@ class PrePostProc(object):
 if __name__ == '__main__':
     input1 = '大洋集团营收额为100,000亿元，截止2018年1月31号'
     tk = list(jieba.cut(input1))
-    input = 'Ta Yang makes 12 thousands inch every year, until 01/31/2018, and my name is Sicheng Tang'
+    input = "You'll Laugh and You'll Cry Through Our Very Favorite Episodes of Queer Eye Season 4"
     p = PrePostProc()
     a= {
         '北京':'beijing',
@@ -520,6 +521,8 @@ if __name__ == '__main__':
         }
 
     s, m = p.pre_proc_en_py(input.split(" "))
+    print("++++")
+    print(p.name_tag_list(input))
     print(input)
     print(s)
     print(m)
