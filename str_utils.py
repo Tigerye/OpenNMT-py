@@ -94,12 +94,8 @@ def split_as_sentence(input_str, type =None):
     def _sp_en(in_str):
         res = []
         for item in sent_tokenize(in_str):
-            # if len(item) >= 50 :
-            if len(item.split(" ")) >= 50:
-                sub_item = item.split(',')
-                res.extend(sub_item)
-            else:
-                res.append(item)
+            # if len(item) >= 50:
+            res.append(item)
         return res
 
     def _sp_zh(in_str):
