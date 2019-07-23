@@ -125,6 +125,7 @@ def _translate(input_text):
     cuted, rep2val = proc.pre_proc_en_py(cut)
     tmp_cut_str = ' '.join(cuted)
     tmp_cut_str, rep2val_nu = proc.pre_proc_en_nu(tmp_cut_str)
+    print("input_text with unks: {}".format(tmp_cut_str))
 
     rep2val = merge_dict(rep2val, rep2val_nu)
     print(' rep2val = {}'.format(rep2val))
