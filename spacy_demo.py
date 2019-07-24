@@ -12,6 +12,8 @@ input8 = "It is rumored around that Facebook just released Libraaa"
 input9 = "University of California sucks"
 input0 = "The government of China forbid its citizens to go to WTO"
 
+input = "In 'Hell Yes ' News , Natalie Portman Will Play the Mighty Thor in the Fourth Thor Film"
+
 test_set = [input6, input7, input8, input9, input0]
 
 
@@ -22,12 +24,9 @@ def spacy_ner(sentence):
         ret.append((ent.text, ent.start_char, ent.end_char, ent_label_))
     return ret
 
-
-for sentence in test_set:
-    doc = nlp(sentence)
-    print(sentence)
-    for ent in doc.ents:
-        print(ent.text, ent.start_char, ent.end_char, ent.label_)
+doc = nlp(input)
+for ent in doc.ents:
+    print(ent.text, ent.start_char, ent.end_char, ent.label_)
 
 
 #print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_, token.shape_, token.is_alpha, token.is_stop)

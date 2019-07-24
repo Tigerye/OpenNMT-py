@@ -12,12 +12,16 @@ import jieba
 import cn2an
 from new_trans_preproc import *
 import spacy
+from deeppavlov import configs, build_model
+
+ner_model = build_model(configs.ner.ner_ontonotes_bert, download=True)
+
 
 nlp = spacy.load('en_core_web_sm')
 sp_pattern = r"<@sp\d{1,3}@>"
 pattern = r'\d+|[零一二三四五六七八九十百千万亿兆]+'
-unit_map = {"百万":"baiwan", "亿":"yibillion", "千":"qianthousand", "万":"wanthousand","元":"yuan", "美元":"dollars", "千克":"kg", "公里":"km", "米":"meters", "厘米":"cm","吨":"tons", "克":"grams", "小时":"hours", "分钟":"minutes", \
-                        "秒":"seconds", "磅":"pounds","盎司":"ounces", "加仑":"gallon","夸脱":"quarts", "品脱":"pints","升":"liter","美分":"cents","英里":"miles", "%":"%", \
+unit_map = { "百万":"baiwan", "亿":"yibillion", "千":"qianthousand", "万":"wanthousand","元":"yuan", "美元":"dollars", "千克":"kg", "公里":"km", "米":"meters", "厘米":"cm","吨":"tons", "克":"grams", "小时":"hours", "分钟":"minutes", \
+        "秒":"seconds", "磅":"pounds", "盎司":"ounces", "加仑":"gallon","夸脱":"quarts", "品脱":"pints","升":"liter","美分":"cents","英里":"miles", "%":"%", \
                         "英尺":"feet", "英尺":"inch", "码":"yard", "毫升":"ml", "平方英寸":"square inch", "平方英尺":"square feet", "英亩":"acre", "英里每小时":"mile per hour", "km / h":"km / h"}
 ent_address = "rm-uf67jlfy9n338fqa5.mysql.rds.aliyuncs.com"
 ent_database = "rt"
@@ -260,7 +264,7 @@ class PrePostProc(object):
 
     def replace_num_zh(self, zh_input, seen, ret_map):
         zh_input, zh_retmap = self.replace_unk(zh_input)
-        pattern = r'\d+|[零一二三四五六七八九十百千万亿兆]+'
+        pattern = r'\d+\.\d+|\d+|[零一二三四五六七八九十百千万亿兆]+'
         zh_match_list = re.findall(pattern, zh_input)
         zh_input_list = list(zh_input)
         for target in zh_match_list:
@@ -285,7 +289,7 @@ class PrePostProc(object):
         return zh_input, ret_map
 
     def replace_num_en(self, en_input, seen, ret_map):
-        pattern = r'\d+|[零一二三四五六七八九十百千万亿兆]+'
+        pattern = r'\d+\.\d+|\d+|[零一二三四五六七八九十百千万亿兆]+'
         en_input, en_retmap = self.replace_unk(en_input)
         en_match_list = re.findall(pattern, en_input)
         en_input_list = list(en_input)
@@ -373,7 +377,7 @@ class PrePostProc(object):
         input_str,rep_map = self.replace_num(input_str)
         return input_str, rep_map
 
-    def spacy_ner(self, sentence):
+    def spacy_nea(self, sentence):
 
         doc = nlp(sentence)
         ret = []
@@ -381,12 +385,40 @@ class PrePostProc(object):
             ret.append((ent.text, ent.start_char, ent.end_char, ent.label_))
         return ret
 
+    def deeppavlov2spacy(self, sentence):
+        double_list = ner_model([sentence])
+        print("ner_result: {}".format(double_list))
+        sentence_list = double_list[0][0]
+        tag_list = double_list[1][0]
+        i = 0
+        ret = []
+        while i < len(tag_list):
+            if tag_list[i] == 'O':
+                i += 1
+            else:
+                tag = tag_list[i]
+                if tag[0] == 'B':
+                    beg = i
+                    if i <  len(tag_list) - 1:
+                        while tag_list[i+1][0] == 'I' and tag_list[i+1][2:] == tag[2:]:
+                            i += 1
+                            if i == len(tag_list) - 1:
+                                break
+                        end = i
+                        i += 1
+                        ret.append((" ".join(sentence_list[beg:end+1]),beg,end,tag[2:]))
+                        ret.append(("".join(sentence_list[beg:end+1]),beg,end,tag[2:]))
+                    else:
+                        i += 1
+                        ret.append((sentence_list[-1], i, i, tag[2:]))
+        return ret
+
     def name_tag_list(self, zh_input):
-        zh_input_ner = self.spacy_ner(zh_input)
+        zh_input_ner = self.deeppavlov2spacy(zh_input)
         print(zh_input_ner)
         ret = []
         for item in zh_input_ner:
-            if item[3] == 'PERSON' or item[3] == 'ORG':
+            if item[3] == 'PERSON' or item[3] == 'ORG' or item[3] == 'WORK_OF_ART':
                 ret.append(item[0])
         return ret
 
@@ -394,6 +426,7 @@ class PrePostProc(object):
         matched = list()
         rep2val = dict()
         name_list = self.name_tag_list(" ".join(input_token))
+        seen = set()
         print("name_list: {}".format(name_list))
 
         for sub_window_size in range(1, 9):
@@ -401,12 +434,14 @@ class PrePostProc(object):
             for item in tmp_sliding:
                 k1 = item[0]
                 if k1 in self._val2key.keys():
+                    print("sp from entity map: {}".format(k1))
                     new_item = (item[0], item[1], item[2], k1)
                     matched.append(new_item)
                 else:
                     for name in name_list:
                         name1 = "".join(name.split(" "))
                         if name == k1 or name1 == k1:
+                            print("sp from spacy: {}".format(k1))
                             new_item = (item[0], item[1], item[2], k1)
                             matched.append(new_item)
 
@@ -414,24 +449,19 @@ class PrePostProc(object):
 
         for item in no_dup:
 
-            rand_cnt = 0
-            replaced_str = None
-            while rand_cnt < 10:
+            if len(seen) == 30:
+                print("more than 30 nu symbols in sentence: {}".format(en_input))
+                return None, None
+            num, seen = generate_random(seen, 30)
+            unk = "<@sp" + str(num) + "@>"
+            
 
-                tmp_seed = random.randint(0,29)
-                tmp_rep = self._py_tpl % tmp_seed
-
-                if tmp_rep in rep2val.keys():
-                    rand_cnt +=1
-                    continue
-                else:
-                    if item[3] in self._val2key.keys():
-                        print("item[3]: {}".format(item[3]))
-                        rep2val[tmp_rep] = self._val2key[item[3]]
-                    else:
-                        rep2val[tmp_rep] = item[3]
-                    replaced_str = tmp_rep
-                    break
+            if item[3] in self._val2key.keys():
+                print("item[3]: {}".format(item[3]))
+                rep2val[unk] = self._val2key[item[3]]
+            else:
+                rep2val[unk] = item[3]
+            replaced_str = unk
             input_token = self._rep_in_lst(input_token, item[1], item[2], replaced_str)
 
         res_token = list()
@@ -513,20 +543,23 @@ class PrePostProc(object):
 if __name__ == '__main__':
     input1 = '大洋集团营收额为100,000亿元，截止2018年1月31号'
     tk = list(jieba.cut(input1))
-    input = "You'll Laugh and You'll Cry Through Our Very Favorite Episodes of Queer Eye Season 4"
+    input = "In 'Hell Yes' News, Natalie Portman Will Play the Mighty Thor in the Fourth Thor Film"
     p = PrePostProc()
     a= {
         '北京':'beijing',
         '金逸':'jinyi'
         }
-
-    s, m = p.pre_proc_en_py(input.split(" "))
-    print("++++")
-    print(p.name_tag_list(input))
-    print(input)
-    print(s)
-    print(m)
-    print(p._key2val["大洋集团"])
+    spacy = p.spacy_ner(input)
+    deep = p.deeppavlov2spacy(input)
+    print(spacy)
+    print(deep)
+    #s, m = p.pre_proc_en_py(input.split(" "))
+    #print("++++")
+    #print(p.name_tag_list(input))
+   # print(input)
+    #print(s)
+    #print(m)
+    #print(p._key2val["大洋集团"])
     """
     out_tk, rep=p.pre_proc_zh_py(tk)
     out_str = ' '.join(out_tk)

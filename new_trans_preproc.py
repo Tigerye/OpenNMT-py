@@ -346,9 +346,10 @@ def generate_random(seen, r):
     """
     keep generating random numbers
     """
-    num = random.sample(range(r), 1)[0]
-    while num in seen:
-        num = random.sample(range(r), 1)[0]
+    if not seen:
+        num = 0
+    else:
+        num = max(seen) + 1
     seen.add(num)
     return num, seen
 
