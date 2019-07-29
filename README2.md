@@ -50,8 +50,8 @@
 
 ## step 3 -  deploy server 
     # start enzh server 
-    python3 /root/workspace/OpenNMT-py/my_server_enzh.py
+    python3 /root/workspace/OpenNMT-py/my_server_enzh.py -gpu 6 -model /root/workspace/OpenNMT-py/my-shell/model_v6-2_enzh_step_170000.pt -verbose -src xxx
     # start zhen server
-    python3 /root/workspace/OpenNMT-py/my_server_zhen.py
+    python3 /root/workspace/OpenNMT-py/my_server_zhen.py ...
 
     
