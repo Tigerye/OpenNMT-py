@@ -12,6 +12,7 @@ from collections import Counter
 #import en_core_web_sm
 import requests
 import sys
+from sliding_utils import sliding_it
 
 
 unk_pattern = r"<@sp\d{1,3}@>|<@nu\d{1,3}@>"
@@ -341,14 +342,25 @@ def NER_service(input_string):
     s = json.loads(s)[0]
     return s
 
-
-def generate_random(seen, r):
+def generate_random_train(seen, r):
     """
     keep generating random numbers
     """
     num = random.sample(range(r), 1)[0]
     while num in seen:
         num = random.sample(range(r), 1)[0]
+    seen.add(num)
+    return num, seen
+
+
+def generate_random(seen, r):
+    """
+    keep generating random numbers
+    """
+    if not seen:
+        num = 0
+    else:
+        num = max(seen) + 1
     seen.add(num)
     return num, seen
 
@@ -420,7 +432,7 @@ class DataCleanser(object):
         self.entity_map = self.LoadEntityDict(ent_address, ent_database, ent_username, ent_password)
         self.zh_entity = self.entity_map.keys()
         self.en_entity = []
-        for key, val in self.entity_map:
+        for key, val in self.entity_map.items():
             self.en_entity += val
         self.zh_path = zh_file
         self.en_path = en_file
@@ -521,7 +533,7 @@ class DataCleanser(object):
                 if isChinese(token):
                     if token_en == target:
                         if num == None:
-                            num, seen = generate_random(seen, 30)
+                            num, seen = generate_random_train(seen, 30)
                             unk = " <@sp" + str(num) + "@> "
                             zhtoken2num[token] = unk
                         zh_input_list[i] = unk
@@ -531,7 +543,7 @@ class DataCleanser(object):
                         token_en1 = en_input_list[j].lower() + en_input_list[j + 1].lower()
                         if token_en1 == target:
                             if num == None:
-                                num, seen = generate_random(seen, 30)
+                                num, seen = generate_random_train(seen, 30)
                                 unk = " <@sp" + str(num) + "@> "
                                 zhtoken2num[token] = unk
                             zh_input_list[i] = unk
@@ -543,7 +555,7 @@ class DataCleanser(object):
                         + en_input_list[j + 2].lower()
                         if token_en2 == target:
                             if num == None:
-                                num, seen = generate_random(seen, 30)
+                                num, seen = generate_random_train(seen, 30)
                                 unk = " <@sp" + str(num) + "@> "
                                 zhtoken2num[token] = unk
                             zh_input_list[i] = unk
@@ -584,15 +596,20 @@ class DataCleanser(object):
                 continue
             if len(self.entity_map[token]) > 0:
                 for alias in self.entity_map[token]:
-                    if alias in en_input:
-                        if token in zhtoken2num.keys():
-                            unk = zhtoken2num[token]
-                        else:
-                            num, seen = generate_random(seen, 30)
-                            unk = " <@sp" + str(num) + "@> "
-                            zhtoken2num[token] = unk
-                        en_input = re.sub(alias, unk, en_input)
-                        zh_input = re.sub(token_space, unk, zh_input)
+                    en_list = []
+                    for i in range(1,4):
+                        en_list += sliding_it(en_input.split(" "), i)
+                    en_list = [item[0] for item in en_list]
+                    for tup in en_list:
+                        if alias.lower() == tup.lower():
+                            if token in zhtoken2num.keys():
+                                unk = zhtoken2num[token]
+                            else:
+                                num, seen = generate_random_train(seen, 30)
+                                unk = " <@sp" + str(num) + "@> "
+                                zhtoken2num[token] = unk
+                            en_input = re.sub(tup, unk, en_input)
+                            zh_input = re.sub(token_space, unk, zh_input)
         zh_input = self.recover_unk(zh_input, zh_retmap)
         en_input = self.recover_unk(en_input, en_retmap)
         return zh_input, en_input, seen
@@ -649,7 +666,7 @@ class DataCleanser(object):
                         if token in zhtoken2num.keys():
                             unk = zhtoken2num[token]
                         else:
-                            num, seen = generate_random(seen, 30)
+                            num, seen = generate_random_train(seen, 30)
                             unk = " <@sp" + str(num) + "@> "
                             zhtoken2num[token] = unk
                         zh_input = re.sub(token_space, unk, zh_input)
@@ -695,7 +712,7 @@ class DataCleanser(object):
                         zh_n = re.findall(pattern2, zh_q)
                         en_n = re.findall(pattern2, en_q)
                         if zh_n == en_n:
-                            num, seen = generate_random(seen, 30)
+                            num, seen = generate_random_train(seen, 30)
                             unk = " <@nu" + str(num) + "@> "
                             zh_input_list = zh_input_list[:zh_index[0]] + [unk] + \
                                             [''] * ((zh_index[1] - zh_index[0]) - 1) + zh_input_list[zh_index[1]:]
@@ -738,7 +755,7 @@ class DataCleanser(object):
                     zh_index = zh_index.span()
                 else:
                     continue
-                num, seen = generate_random(seen, 30)
+                num, seen = generate_random_train(seen, 30)
                 unk = " <@nu" + str(num) + "@> "
                 en_input_list = en_input_list[:en_index[0]] + [unk] + \
                                 [''] * (len(num_target) - 1) + en_input_list[en_index[1]:]
@@ -755,20 +772,18 @@ class DataCleanser(object):
         en_input = self.recover_unk(en_input, en_retmap)
         return zh_input, en_input
 
-    def data_process(self, zh_input, en_input, line_count, pinyin = True, Entity = True, Number = True, Units = True):
+    def data_process(self, zh_input, en_input, line_count, pinyin = True, Entity = True, Number = False, Units = False):
         """
         The main function to process data.
         """
         seen = set()
         if Entity:
             zh_input, en_input, seen = self.replace_entity(zh_input, en_input, line_count)
-            print("not entity")
             if zh_input == None and en_input == None:
                 print("In line {}, detected more than 30 unks".format(line_count))
                 return None, None
         if pinyin:
             zh_input, en_input = self.replace_pinyin(zh_input, en_input, line_count, seen)
-            print("not pinyin")
             if zh_input == None and en_input == None:
                 print("In line {}, detected more than 30 unks".format(line_count))
                 return None, None
@@ -796,7 +811,7 @@ class DataCleanser(object):
                      line_count += 1
                      continue
                  try:
-                     zh_input, en_input = self.data_process(zh_input, en_input, line_count)
+                     zh_input_new, en_input_new = self.data_process(zh_input, en_input, line_count)
                  except:
                      print("en_input: {}".format(en_input))
                      print("zh_input: {}".format(zh_input))
@@ -807,18 +822,24 @@ class DataCleanser(object):
                      continue
                  if zh_input == None and en_input == None:
                      continue
-                 file_en_processed.write(en_input)
-                 file_zh_processed.write(zh_input)
+                 if zh_input_new == zh_input and en_input_new == en_input:
+                     file_en_processed.write(en_input)
+                     file_zh_processed.write(zh_input)
+                 else:
+                     file_en_processed.write(en_input)
+                     file_en_processed.write(en_input_new)
+                     file_zh_processed.write(zh_input)
+                     file_zh_processed.write(zh_input_new)
                  line_count += 1
                  if line_count == higher:
                      break
-                 if line_count % 1 == 0:
+                 if line_count % 1000 == 0:
                      print(line_count)
 
 
 if __name__ == '__main__':
-    cleanser = DataCleanser("demo.zh", "demo.en")
-    lower, higher = int(sys.argv[1]), int(sys.argv[2])
+    lower, higher, zh_file_address, en_file_address = int(sys.argv[1]), int(sys.argv[2]), sys.argv[3], sys.argv[4]
+    cleanser = DataCleanser(zh_file_address, en_file_address)
     #input_zh = "最 不 发达国家 在 相关 的 三大 市场 享有 重大 优惠 幅度 的 出口 包括 鲜鱼 或 冻鱼 ( 在 不同 市场 优惠 幅度 在 10% 到 20% 之间 ) ； 章鱼 ( 8% ) ； 腌 金枪鱼 ( 9% 到 24% ) ； 鲜切花 ( 4% 到 12% ) ； 香草 ( 6% ) ； 丁香 ( 8% ) ； 烟草 ( 31% ) ； 石油 制剂 ( 4% 到 6% ) ； 尿素 ( 7% ) ； 皮革 ( 3% 到 22% ) ； 黄 麻布 ( 4% 到 14% ) ； 毛毯 ( 8% 到 9.5% ) ； 服装 ( 6% 到 13% ) ； 亚麻布 ( 12% ) ； 黄麻 产品 ( 3% ) ； 鞋类 ( 7% 到 25% ) ； 帽子 ( 2% 到 6% ) ； 和 接线 组 ( 2% 到 5% ) "
     #input_en = "LDC exports enjoying significant preferential margins in the relevant three major markets include , inter alia , fresh or frozen fish ( margin of 10 % to 22 % , depending on the market ) ; octopus ( 8 % ) ; preserved tuna ( 9 % to 24 % ) ; fresh cut flowers ( 4 % to 12 % ) ; vanilla ( 6 % ) ; cloves ( 8 % ) ; tobacco ( 31 % ) ; petroleum preparations ( 4 % to 6 % ) ; urea ( 7 % ) ; leather ( 3 % to 22 % ) ; jute fabrics ( 4 % to 14 % ) ; wool carpets ( 8 % to 9.5 % ) ; garments ( 6 % to 13 % ) ; linen ( 12 % ) ; jute products ( 3 % ) ; footwear ( 7 % to 25 % ) ; hats ( 2 % to 6 % ) ; and wiring sets ( 2 % to 5 % ) ."
     #result_zh, result_en = cleanser.data_process(input_zh, input_en, 0)

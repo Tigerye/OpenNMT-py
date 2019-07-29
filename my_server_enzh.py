@@ -112,23 +112,42 @@ def _unzip_list(origin_pred):
         res.append(item[0])
     return res
 
+def normal_cap(token_list):
+    res = []
+    for token in token_list:
+        if token[0].isupper():
+            tmp = token[0] + token[1:].lower()
+            res.append(tmp)
+        else:
+            res.append(token)
+    return res
+
 
 def _translate(input_text):
-
+    print(input_text)
     # tokenize
     cut = _tokenize_proc_lines(input_text)
     print('tok = {}'.format(cut))
     # split 2 list
     cut = cut.split()
+    
+    #TODO: 纯大写单词替换成只开头大写
+    cut = normal_cap(cut)
 
     # replace entity
+    print("cut you want: {}".format(" ".join(cut)))
     cuted, rep2val = proc.pre_proc_en_py(cut)
+    print("sp_str: {}".format(cuted))
+    print("sp_map: {}".format(rep2val))
     tmp_cut_str = ' '.join(cuted)
     tmp_cut_str, rep2val_nu = proc.pre_proc_en_nu(tmp_cut_str)
     print("input_text with unks: {}".format(tmp_cut_str))
 
     rep2val = merge_dict(rep2val, rep2val_nu)
     print(' rep2val = {}'.format(rep2val))
+
+    # TODO
+    #tmp_cut_str = tmp_cut_str.lower()
 
     # cut = cut_input(input_text)
     cut = str_utils.split_as_sentence(tmp_cut_str, type='en')
@@ -142,6 +161,9 @@ def _translate(input_text):
     # bpe
     cut = _bpe_proc_lines(cut)
     print('bpe = {}'.format(cut))
+
+    # TODO: 大小写对BPE影响很大
+    #cut = list(map(lambda x:x.lower(), cut)) 
 
     cut_gen = _get_input_func(cut)
     score,prediction = translator.translate(
